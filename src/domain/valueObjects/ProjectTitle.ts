@@ -5,7 +5,13 @@ export class ProjectTitle {
     if (!value || value.trim() === '') {
       throw new Error('プロジェクトタイトルを入力してください');
     }
-    return new ProjectTitle(value.trim());
+
+    const trimmedValue = value.trim();
+    if (trimmedValue.length > 200) {
+      throw new Error('プロジェクトタイトルは200文字以内で入力してください');
+    }
+
+    return new ProjectTitle(trimmedValue);
   }
 
   get value(): string {

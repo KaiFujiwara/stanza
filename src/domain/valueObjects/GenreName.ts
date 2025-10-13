@@ -5,7 +5,13 @@ export class GenreName {
     if (!value || value.trim() === '') {
       throw new Error('ジャンル名を入力してください');
     }
-    return new GenreName(value.trim());
+
+    const trimmedValue = value.trim();
+    if (trimmedValue.length > 50) {
+      throw new Error('ジャンル名は50文字以内で入力してください');
+    }
+
+    return new GenreName(trimmedValue);
   }
 
   get value(): string {

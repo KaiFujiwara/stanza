@@ -5,7 +5,13 @@ export class SectionName {
     if (!value || value.trim() === '') {
       throw new Error('セクション名を入力してください');
     }
-    return new SectionName(value.trim());
+
+    const trimmedValue = value.trim();
+    if (trimmedValue.length > 50) {
+      throw new Error('セクション名は50文字以内で入力してください');
+    }
+
+    return new SectionName(trimmedValue);
   }
 
   get value(): string {

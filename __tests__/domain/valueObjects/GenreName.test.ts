@@ -25,5 +25,19 @@ describe('GenreName', () => {
         GenreName.create('   ');
       }).toThrow('ジャンル名を入力してください');
     });
+
+    it('50文字を超える場合はエラーをスローする', () => {
+      const longName = 'あ'.repeat(51);
+      expect(() => {
+        GenreName.create(longName);
+      }).toThrow('ジャンル名は50文字以内で入力してください');
+    });
+
+    it('50文字の場合は作成できる', () => {
+      const maxLengthName = 'あ'.repeat(50);
+      const genreName = GenreName.create(maxLengthName);
+
+      expect(genreName.value).toBe(maxLengthName);
+    });
   });
 });

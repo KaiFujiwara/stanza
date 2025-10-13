@@ -5,7 +5,13 @@ export class PhraseText {
     if (!value || value.trim() === '') {
       throw new Error('フレーズを入力してください');
     }
-    return new PhraseText(value.trim());
+
+    const trimmedValue = value.trim();
+    if (trimmedValue.length > 500) {
+      throw new Error('フレーズは500文字以内で入力してください');
+    }
+
+    return new PhraseText(trimmedValue);
   }
 
   get value(): string {

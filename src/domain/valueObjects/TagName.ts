@@ -5,7 +5,13 @@ export class TagName {
     if (!value || value.trim() === '') {
       throw new Error('タグ名を入力してください');
     }
-    return new TagName(value.trim());
+
+    const trimmedValue = value.trim();
+    if (trimmedValue.length > 30) {
+      throw new Error('タグ名は30文字以内で入力してください');
+    }
+
+    return new TagName(trimmedValue);
   }
 
   get value(): string {

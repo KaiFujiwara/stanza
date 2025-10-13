@@ -5,7 +5,13 @@ export class FolderName {
     if (!value || value.trim() === '') {
       throw new Error('フォルダ名を入力してください');
     }
-    return new FolderName(value.trim());
+
+    const trimmedValue = value.trim();
+    if (trimmedValue.length > 100) {
+      throw new Error('フォルダ名は100文字以内で入力してください');
+    }
+
+    return new FolderName(trimmedValue);
   }
 
   get value(): string {

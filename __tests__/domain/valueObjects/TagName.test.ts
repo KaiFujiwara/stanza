@@ -25,5 +25,19 @@ describe('TagName', () => {
         TagName.create('   ');
       }).toThrow('タグ名を入力してください');
     });
+
+    it('30文字を超える場合はエラーをスローする', () => {
+      const longName = 'あ'.repeat(31);
+      expect(() => {
+        TagName.create(longName);
+      }).toThrow('タグ名は30文字以内で入力してください');
+    });
+
+    it('30文字の場合は作成できる', () => {
+      const maxLengthName = 'あ'.repeat(30);
+      const tagName = TagName.create(maxLengthName);
+
+      expect(tagName.value).toBe(maxLengthName);
+    });
   });
 });

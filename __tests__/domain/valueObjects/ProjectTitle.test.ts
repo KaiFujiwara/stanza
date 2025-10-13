@@ -32,11 +32,18 @@ describe('ProjectTitle', () => {
       expect(title.value).toBe('新曲のタイトル');
     });
 
-    it('長いタイトルも作成できる', () => {
-      const longTitle = 'とても長いプロジェクトのタイトルですが問題なく作成できるはずです';
-      const title = ProjectTitle.create(longTitle);
+    it('200文字を超える場合はエラーをスローする', () => {
+      const longTitle = 'あ'.repeat(201);
+      expect(() => {
+        ProjectTitle.create(longTitle);
+      }).toThrow('プロジェクトタイトルは200文字以内で入力してください');
+    });
 
-      expect(title.value).toBe(longTitle);
+    it('200文字の場合は作成できる', () => {
+      const maxLengthTitle = 'あ'.repeat(200);
+      const title = ProjectTitle.create(maxLengthTitle);
+
+      expect(title.value).toBe(maxLengthTitle);
     });
   });
 

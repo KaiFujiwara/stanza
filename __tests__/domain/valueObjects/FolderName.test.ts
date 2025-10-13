@@ -37,6 +37,20 @@ describe('FolderName', () => {
 
       expect(folderName.value).toBe('テストフォルダ');
     });
+
+    it('100文字を超える場合はエラーをスローする', () => {
+      const longName = 'あ'.repeat(101);
+      expect(() => {
+        FolderName.create(longName);
+      }).toThrow('フォルダ名は100文字以内で入力してください');
+    });
+
+    it('100文字の場合は作成できる', () => {
+      const maxLengthName = 'あ'.repeat(100);
+      const folderName = FolderName.create(maxLengthName);
+
+      expect(folderName.value).toBe(maxLengthName);
+    });
   });
 
   describe('toString', () => {

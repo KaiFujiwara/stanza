@@ -39,11 +39,18 @@ describe('PhraseText', () => {
       expect(phraseText.value).toBe(multilinePhrase);
     });
 
-    it('長いフレーズも作成できる', () => {
-      const longPhrase = 'とても長いフレーズですが、このようなケースでもValue Objectとして正しく作成できるはずです。';
-      const phraseText = PhraseText.create(longPhrase);
+    it('500文字を超える場合はエラーをスローする', () => {
+      const longPhrase = 'あ'.repeat(501);
+      expect(() => {
+        PhraseText.create(longPhrase);
+      }).toThrow('フレーズは500文字以内で入力してください');
+    });
 
-      expect(phraseText.value).toBe(longPhrase);
+    it('500文字の場合は作成できる', () => {
+      const maxLengthPhrase = 'あ'.repeat(500);
+      const phraseText = PhraseText.create(maxLengthPhrase);
+
+      expect(phraseText.value).toBe(maxLengthPhrase);
     });
   });
 
