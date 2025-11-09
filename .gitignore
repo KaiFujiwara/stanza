@@ -26,12 +26,18 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
+# Firebase
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
 # macOS
 .DS_Store
 *.pem
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
