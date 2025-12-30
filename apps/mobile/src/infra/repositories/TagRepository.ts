@@ -1,253 +1,94 @@
 // Repository implementation
-import { Tag } from '@lyrics-notes/core';
 import {
-  collectionGroup,
-  deleteDoc,
-  documentId,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  setDoc,
-  startAt,
-  endAt,
-  Timestamp,
-  where,
-  writeBatch,
-  type CollectionReference,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { getUserId, userCollection, userDoc } from './utils/firestorePaths';
+  Tag,
+  TagRepository as TagRepositoryPort,
+  EntityId,
+} from '@lyrics-notes/core';
+import { supabase } from '@/lib/supabase/client';
 
-type TagDocument = {
+type TagRow = {
   id: string;
+  user_id: string;
   name: string;
-  nameLower: string;
-  color?: string | null;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  color: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
-type TagRefDocument = {
-  tagId: string;
-  userId: string;
-  assignedAt: Timestamp;
-};
+export class TagRepository implements TagRepositoryPort {
+  private readonly tableName = 'tags';
 
-type PhraseRefDocument = {
-  phraseId: string;
-  userId: string;
-  taggedAt: Timestamp;
-};
-
-type TagScope = 'folders' | 'projects' | 'phrases';
-
-export class TagRepository {
-  private get collection() {
-    return userCollection<TagDocument>('tags');
-  }
-
-  private docToEntity(data: TagDocument, id: string): Tag {
-    return new Tag(
-      id,
-      data.name,
-      data.color ?? undefined,
-      data.createdAt.toDate(),
-      data.updatedAt.toDate()
+  private rowToEntity(row: TagRow): Tag {
+    return Tag.reconstruct(
+      EntityId.from(row.id),
+      row.name,
+      row.color ?? undefined
     );
   }
 
-  private tagRefsCollection(
-    scope: TagScope,
-    parentId: string
-  ): CollectionReference<TagRefDocument> {
-    return userCollection<TagRefDocument>(scope, parentId, 'tagRefs');
-  }
-
-  private phraseRefsCollection(
-    tagId: string
-  ): CollectionReference<PhraseRefDocument> {
-    return userCollection<PhraseRefDocument>('tags', tagId, 'phraseRefs');
-  }
-
-  private async fetchTagsByIds(ids: string[]): Promise<Tag[]> {
-    if (ids.length === 0) {
-      return [];
+  async findById(id: EntityId): Promise<Tag | null> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('User not authenticated');
     }
 
-    const chunks: string[][] = [];
-    for (let i = 0; i < ids.length; i += 10) {
-      chunks.push(ids.slice(i, i + 10));
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('id', id as string)
+      .eq('user_id', user.user.id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Not found
+        return null;
+      }
+      throw new Error(`Failed to fetch tag: ${error.message}`);
     }
 
-    const results: Tag[] = [];
-    for (const chunk of chunks) {
-      const snapshot = await getDocs(
-        query(this.collection, where(documentId(), 'in', chunk))
-      );
-      snapshot.forEach(doc => {
-        results.push(this.docToEntity(doc.data(), doc.id));
-      });
-    }
-
-    return results.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  private async fetchLinkedTagIds(
-    scope: TagScope,
-    parentId: string
-  ): Promise<string[]> {
-    const snapshot = await getDocs(this.tagRefsCollection(scope, parentId));
-    return snapshot.docs.map(doc => doc.id);
-  }
-
-  private async fetchLinkedTags(scope: TagScope, parentId: string) {
-    const ids = await this.fetchLinkedTagIds(scope, parentId);
-    return this.fetchTagsByIds(ids);
-  }
-
-  private async createTagRef(scope: TagScope, parentId: string, tagId: string) {
-    const ref = this.tagRefsCollection(scope, parentId);
-    await setDoc(doc(ref, tagId), {
-      tagId,
-      userId: getUserId(),
-      assignedAt: Timestamp.fromDate(new Date()),
-    });
-  }
-
-  private async removeTagRef(scope: TagScope, parentId: string, tagId: string) {
-    const ref = this.tagRefsCollection(scope, parentId);
-    await deleteDoc(doc(ref, tagId));
-  }
-
-  async findAll(): Promise<Tag[]> {
-    const snapshot = await getDocs(
-      query(this.collection, orderBy('nameLower', 'asc'))
-    );
-    return snapshot.docs.map(doc => this.docToEntity(doc.data(), doc.id));
-  }
-
-  async findById(id: string): Promise<Tag | null> {
-    const docRef = userDoc<TagDocument>('tags', id);
-    const snapshot = await getDoc(docRef);
-    if (!snapshot.exists()) {
-      return null;
-    }
-    return this.docToEntity(snapshot.data() as TagDocument, snapshot.id);
-  }
-
-  async findByName(name: string): Promise<Tag | null> {
-    const normalized = name.trim().toLowerCase();
-    const snapshot = await getDocs(
-      query(this.collection, where('nameLower', '==', normalized), limit(1))
-    );
-    if (snapshot.empty) {
-      return null;
-    }
-    const doc = snapshot.docs[0];
-    return this.docToEntity(doc.data(), doc.id);
+    return this.rowToEntity(data as TagRow);
   }
 
   async save(tag: Tag): Promise<void> {
-    const docRef = userDoc<TagDocument>('tags', tag.id);
-    const payload: TagDocument = {
-      id: tag.id,
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('User not authenticated');
+    }
+
+    const payload = {
+      id: tag.id as string,
+      user_id: user.user.id,
       name: tag.name,
-      nameLower: tag.name.toLowerCase(),
       color: tag.color ?? null,
-      createdAt: Timestamp.fromDate(tag.createdAt),
-      updatedAt: Timestamp.fromDate(tag.updatedAt),
+      // created_at, updated_at はDBトリガーで自動管理
     };
-    await setDoc(docRef, payload, { merge: true });
+
+    const { error } = await supabase
+      .from(this.tableName)
+      .upsert(payload);
+
+    if (error) {
+      throw new Error(`Failed to save tag: ${error.message}`);
+    }
   }
 
-  async delete(id: string): Promise<boolean> {
-    const docRef = userDoc<TagDocument>('tags', id);
-    const snapshot = await getDoc(docRef);
-    if (!snapshot.exists()) {
-      return false;
+  async delete(id: EntityId): Promise<void> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('User not authenticated');
     }
 
-    const batch = writeBatch(db);
-    batch.delete(docRef);
+    // phrase_tagsのON DELETE CASCADEにより、tagsレコード削除時に自動削除される
+    const { error } = await supabase
+      .from(this.tableName)
+      .delete()
+      .eq('id', id as string)
+      .eq('user_id', user.user.id);
 
-    const tagRefsSnapshot = await getDocs(
-      query(
-        collectionGroup(db, 'tagRefs'),
-        where('tagId', '==', id),
-        where('userId', '==', getUserId())
-      )
-    );
-    tagRefsSnapshot.forEach(refDoc => batch.delete(refDoc.ref));
-
-    const phraseRefsSnapshot = await getDocs(this.phraseRefsCollection(id));
-    phraseRefsSnapshot.forEach(refDoc => batch.delete(refDoc.ref));
-
-    await batch.commit();
-    return true;
-  }
-
-  async search(queryText: string): Promise<Tag[]> {
-    const normalized = queryText.trim().toLowerCase();
-    if (!normalized) {
-      return this.findAll();
+    if (error) {
+      throw new Error(`Failed to delete tag: ${error.message}`);
     }
-
-    const snapshot = await getDocs(
-      query(
-        this.collection,
-        orderBy('nameLower'),
-        startAt(normalized),
-        endAt(`${normalized}\uf8ff`)
-      )
-    );
-    return snapshot.docs.map(doc => this.docToEntity(doc.data(), doc.id));
-  }
-
-  async findByFolderId(folderId: string): Promise<Tag[]> {
-    return this.fetchLinkedTags('folders', folderId);
-  }
-
-  async findByProjectId(projectId: string): Promise<Tag[]> {
-    return this.fetchLinkedTags('projects', projectId);
-  }
-
-  async findByPhraseId(phraseId: string): Promise<Tag[]> {
-    return this.fetchLinkedTags('phrases', phraseId);
-  }
-
-  async addToFolder(folderId: string, tagId: string): Promise<void> {
-    await this.createTagRef('folders', folderId, tagId);
-  }
-
-  async addToProject(projectId: string, tagId: string): Promise<void> {
-    await this.createTagRef('projects', projectId, tagId);
-  }
-
-  async addToPhrase(phraseId: string, tagId: string): Promise<void> {
-    await this.createTagRef('phrases', phraseId, tagId);
-
-    const phraseRefs = this.phraseRefsCollection(tagId);
-    await setDoc(doc(phraseRefs, phraseId), {
-      phraseId,
-      userId: getUserId(),
-      taggedAt: Timestamp.fromDate(new Date()),
-    });
-  }
-
-  async removeFromFolder(folderId: string, tagId: string): Promise<void> {
-    await this.removeTagRef('folders', folderId, tagId);
-  }
-
-  async removeFromProject(projectId: string, tagId: string): Promise<void> {
-    await this.removeTagRef('projects', projectId, tagId);
-  }
-
-  async removeFromPhrase(phraseId: string, tagId: string): Promise<void> {
-    await this.removeTagRef('phrases', phraseId, tagId);
-    await deleteDoc(doc(this.phraseRefsCollection(tagId), phraseId));
   }
 }
 

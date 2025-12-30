@@ -3,42 +3,27 @@
 ## プロジェクト概要
 歌詞のアイデアをその場でメモし、音数判定や韻の確認など歌詞制作に特化した機能を提供するアプリ
 
-## 技術スタック
-- **Frontend**: React Native (Expo SDK 54)
-- **Database**: ローカルストレージ (Realm/SQLite) → 将来: Supabase
-- **Build**: EAS Build (dev/production環境)
-- **言語処理**: 形態素解析/音数カウント/韻判定
+## ドキュメント
+詳細な設計・仕様については `/docs` ディレクトリを参照してください：
+- [アーキテクチャ設計](docs/architecture.md)
+- [データモデル](docs/data-model.md)
+- [画面設計](docs/screen-structure.md)
+- [ブランチ戦略](docs/branch-strategy.md)
 
-## ディレクトリ構成
-```
-/app          # Expo Router画面定義
-/components   # 共通コンポーネント
-/hooks        # カスタムフック
-/lib          # ユーティリティ・ライブラリ
-/constants    # 定数定義
-/docs         # ドキュメント
-```
+## 開発時の注意事項
+**IMPORTANT: 以下のコマンドは明示的な指示がない限り実行しないこと**
 
-## 主要機能 (MVP)
-1. **プロジェクト管理**: 楽曲単位での歌詞管理
-2. **バージョン管理**: 編集履歴の保存
-3. **音数カウント**: 行ごとの拍数自動計算
-4. **韻チェック**: 末尾母音の一致判定
-5. **検索機能**: 単語ベースの検索
+開発環境に直接影響を与えるコマンドは、ユーザーの明示的な許可が必要です：
 
-## データモデル
-- Project: 楽曲プロジェクト
-- Version: 歌詞バージョン（セクション別）
-- Analysis: 行ごとの解析結果（音数・韻）
+### 禁止コマンド（明示的指示がない限り実行禁止）
+- `npm run build` - ビルド実行
+- `npm run dev` / `npx expo start` - 開発サーバー起動
+- `npx supabase migration up` - マイグレーション実行
+- `npx supabase db reset` - データベースリセット
+- `git push` / `git commit` - Git操作（明示的な指示があれば可）
 
-## 開発環境
-- TypeScript設定済み
-- パスエイリアス: @/* → プロジェクトルート
-- EAS設定: development/production
-
-## 今後の実装予定
-- クラウド同期 (Supabase)
-- ユーザー認証
-- 高度な韻判定（内部韻・頭韻）
-- フレーズストック機能
-- タグ管理システム
+### 許可されている操作
+- マイグレーションファイルの作成・編集（実行は禁止）
+- コードの読み取り・編集・作成
+- `git status` / `git diff` などの参照系コマンド
+- ファイル検索・grep 操作

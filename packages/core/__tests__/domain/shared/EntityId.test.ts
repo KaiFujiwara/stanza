@@ -1,25 +1,9 @@
-// uuid v13はESM-onlyなので、Jestでモック化
-let mockUuidCounter = 0;
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => {
-    // 呼び出すたびに異なるUUIDを返す
-    mockUuidCounter++;
-    return `550e8400-e29b-41d4-a716-44665544${String(mockUuidCounter).padStart(4, '0')}`;
-  }),
-  validate: jest.fn((value: string) => {
-    // 簡易的なUUID v4形式の検証
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(value);
-  }),
-}));
-
+import { resetMockUuidCounter } from '../../setup/mockUuid';
 import { EntityId } from '../../../src/domain/shared/EntityId';
 
 describe('EntityId', () => {
   beforeEach(() => {
-    // 各テストの前にカウンターをリセット
-    mockUuidCounter = 0;
+    resetMockUuidCounter();
     jest.clearAllMocks();
   });
 

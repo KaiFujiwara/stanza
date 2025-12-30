@@ -1,36 +1,48 @@
+// ============================================================================
 // Shared
-export { EntityId } from './shared/EntityId.js';
-export type { EntityId as EntityIdType } from './shared/EntityId.js';
+// ============================================================================
+export * from './shared/EntityId';
 
-// Tag
-export * from './tag/Tag.js';
-export * from './tag/TagRepository.js';
-export { TagColor } from './tag/vo/TagColor.js';
-export { TagName } from './tag/vo/TagName.js';
+// ============================================================================
+// Folder
+// ============================================================================
+export * from './folder/Folder';
+export * from './folder/FolderRepository';
+export * from './folder/vo/FolderName';
 
-// Project
-export * from './project/Folder.js';
-export * from './project/FolderRepository.js';
-export * from './project/Line.js';
-export * from './project/LineRepository.js';
-export * from './project/Project.js';
-export * from './project/ProjectRepository.js';
-export * from './project/Section.js';
-export * from './project/SectionRepository.js';
-export { FolderName } from './project/vo/FolderName.js';
-export { ProjectTitle } from './project/vo/ProjectTitle.js';
-export { SectionName } from './project/vo/SectionName.js';
-
+// ============================================================================
 // Genre
-export * from './genre/Genre.js';
-export * from './genre/GenrePresetRepository.js';
-export * from './genre/GenreRepository.js';
-export * from './genre/GenreTemplateSection.js';
-export { GenreDescription } from './genre/vo/GenreDescription.js';
-export { GenreName } from './genre/vo/GenreName.js';
+// ============================================================================
+export * from './genre/Genre';
+export * from './genre/GenreRepository';
+export * from './genre/GenreTemplateSection';
+export * from './genre/vo/GenreDescription';
+export * from './genre/vo/GenreName';
+export * from './genre/vo/TemplateSectionName';
 
+// ============================================================================
 // Phrase
-export * from './phrase/Phrase.js';
-export * from './phrase/PhraseRepository.js';
-export { PhraseText } from './phrase/vo/PhraseText.js';
+// ============================================================================
+export * from './phrase/Phrase';
+export * from './phrase/PhraseRepository';
+export * from './phrase/vo/PhraseNote';
+export * from './phrase/vo/PhraseText';
+
+// ============================================================================
+// Project
+// ============================================================================
+export * from './project/Project';
+export * from './project/ProjectRepository';
+export * from './project/Section';
+export * from './project/vo/ProjectTitle';
+export * from './project/vo/SectionName';
+export * from './project/vo/LineText';
+
+// ============================================================================
+// Tag
+// ============================================================================
+export * from './tag/Tag';
+export * from './tag/TagRepository';
+export * from './tag/vo/TagColor';
+export * from './tag/vo/TagName';
 

@@ -3,45 +3,59 @@ import { TagColor } from './vo/TagColor';
 import { EntityId } from '../shared/EntityId';
 
 export class Tag {
-  constructor(
-    public readonly id: string,
-    public name: string,
-    public color?: string,
-    public readonly createdAt: Date = new Date(),
-    public updatedAt: Date = new Date()
+  private _id: EntityId;
+  private _name: string;
+  private _color?: string;
+
+  private constructor(
+    id: EntityId,
+    name: string,
+    color: string | undefined
   ) {
-    TagName.validate(name);
-    if (color !== undefined) {
-      TagColor.validate(color);
-    }
+    this._id = id;
+    this._name = TagName.validate(name);
+    this._color = TagColor.validate(color);
+  }
+
+  get id(): EntityId {
+    return this._id;
+  }
+
+  get name(): string {
+    return this._name;
+  }
+
+  get color(): string | undefined {
+    return this._color;
   }
 
   static create(
     name: string,
     color?: string
   ): Tag {
-    const validatedName = TagName.validate(name);
-    const validatedColor = TagColor.validate(color);
-    const now = new Date();
     return new Tag(
       EntityId.generate(),
-      validatedName,
-      validatedColor,
-      now,
-      now
+      name,
+      color
     );
+  }
+
+  static reconstruct(
+    id: EntityId,
+    name: string,
+    color: string | undefined
+  ): Tag {
+    return new Tag(id, name, color);
   }
 
   updateName(name: string): void {
     const validatedName = TagName.validate(name);
-    this.name = validatedName;
-    this.updatedAt = new Date();
+    this._name = validatedName;
   }
 
   updateColor(color?: string): void {
     const validatedColor = TagColor.validate(color);
-    this.color = validatedColor;
-    this.updatedAt = new Date();
+    this._color = validatedColor;
   }
 
 }

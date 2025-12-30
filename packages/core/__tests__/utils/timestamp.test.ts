@@ -1,4 +1,4 @@
-import { normalizeTimestamp } from '../../src';
+import { normalizeTimestamp } from '../../src/utils/timestamp';
 
 describe('normalizeTimestamp', () => {
   describe('UNIX秒（10桁）の変換', () => {

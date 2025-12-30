@@ -1,154 +1,121 @@
 // Repository implementation
-import { Phrase } from '@lyrics-notes/core';
+import { supabase } from '@/lib/supabase/client';
 import {
-  deleteDoc,
-  doc,
-  documentId,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  setDoc,
-  Timestamp,
-  where,
-  writeBatch,
-  type CollectionReference,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { userCollection, userDoc } from './utils/firestorePaths';
+  EntityId,
+  Phrase,
+  PhraseRepository as PhraseRepositoryPort,
+} from '@lyrics-notes/core';
 
-type PhraseDocument = {
+type PhraseRow = {
   id: string;
+  user_id: string;
   text: string;
-  note?: string | null;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
-type PhraseTagRefDocument = {
-  tagId: string;
-  userId: string;
-  assignedAt: Timestamp;
+type PhraseTagRow = {
+  id: string;
+  phrase_id: string;
+  tag_id: string;
+  created_at: string;
 };
 
-export class PhraseRepository {
-  private get collection() {
-    return userCollection<PhraseDocument>('phrases');
-  }
+export class PhraseRepository implements PhraseRepositoryPort {
+  private readonly tableName = 'phrases';
+  private readonly phraseTagsTableName = 'phrase_tags';
 
-  private phraseTagRefsCollection(
-    phraseId: string
-  ): CollectionReference<PhraseTagRefDocument> {
-    return userCollection<PhraseTagRefDocument>('phrases', phraseId, 'tagRefs');
-  }
+  /**
+   * フレーズIDに紐づくタグIDを取得
+   */
+  private async getTagIds(phraseId: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from(this.phraseTagsTableName)
+      .select('tag_id')
+      .eq('phrase_id', phraseId);
 
-  private docToEntity(data: PhraseDocument, id: string): Phrase {
-    return new Phrase(
-      id,
-      data.text,
-      data.note ?? undefined,
-      data.createdAt.toDate(),
-      data.updatedAt.toDate()
-    );
-  }
-
-  private async fetchPhrasesByIds(ids: string[]): Promise<Phrase[]> {
-    if (ids.length === 0) {
-      return [];
+    if (error) {
+      throw new Error(`フレーズのタグ取得に失敗しました: ${error.message}`);
     }
 
-    const chunks: string[][] = [];
-    for (let i = 0; i < ids.length; i += 10) {
-      chunks.push(ids.slice(i, i + 10));
-    }
-
-    const results: Phrase[] = [];
-    for (const chunk of chunks) {
-      const snapshot = await getDocs(
-        query(this.collection, where(documentId(), 'in', chunk))
-      );
-      snapshot.forEach(doc => {
-        results.push(this.docToEntity(doc.data(), doc.id));
-      });
-    }
-
-    return results.sort(
-      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
-    );
+    return (data as { tag_id: string }[]).map((row) => row.tag_id);
   }
 
-  async findAll(): Promise<Phrase[]> {
-    const snapshot = await getDocs(
-      query(this.collection, orderBy('updatedAt', 'desc'))
+  /**
+   * DBレコード → エンティティ変換
+   */
+  private rowToEntity(row: PhraseRow, tagIds: string[]): Phrase {
+    return Phrase.reconstruct(
+      EntityId.from(row.id),
+      row.text,
+      row.note ?? undefined,
+      tagIds
     );
-    return snapshot.docs.map(doc => this.docToEntity(doc.data(), doc.id));
   }
 
   async findById(id: string): Promise<Phrase | null> {
-    const docRef = userDoc<PhraseDocument>('phrases', id);
-    const snapshot = await getDoc(docRef);
-    if (!snapshot.exists()) {
-      return null;
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('認証されていません');
     }
-    return this.docToEntity(snapshot.data() as PhraseDocument, snapshot.id);
+
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user.user.id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Not found
+        return null;
+      }
+      throw new Error(`フレーズの取得に失敗しました: ${error.message}`);
+    }
+
+    const tagIds = await this.getTagIds(id);
+    return this.rowToEntity(data as PhraseRow, tagIds);
   }
 
   async save(phrase: Phrase): Promise<void> {
-    const docRef = userDoc<PhraseDocument>('phrases', phrase.id);
-    const payload: PhraseDocument = {
-      id: phrase.id,
-      text: phrase.text,
-      note: phrase.note ?? null,
-      createdAt: Timestamp.fromDate(phrase.createdAt),
-      updatedAt: Timestamp.fromDate(phrase.updatedAt),
-    };
-    await setDoc(docRef, payload, { merge: true });
-  }
-
-  async delete(id: string): Promise<boolean> {
-    const docRef = userDoc<PhraseDocument>('phrases', id);
-    const snapshot = await getDoc(docRef);
-    if (!snapshot.exists()) {
-      return false;
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('認証されていません');
     }
 
-    const batch = writeBatch(db);
-    batch.delete(docRef);
-
-    const tagRefsSnapshot = await getDocs(this.phraseTagRefsCollection(id));
-    tagRefsSnapshot.forEach(refDoc => {
-      batch.delete(refDoc.ref);
-      batch.delete(userDoc('tags', refDoc.id, 'phraseRefs', id));
+    // トランザクション内で実行
+    const { error } = await supabase.rpc('save_phrase_with_tags', {
+      p_note: phrase.note ?? null,
+      p_phrase_id: phrase.id,
+      p_tag_ids: phrase.tagIds,
+      p_text: phrase.text,
+      p_user_id: user.user.id,
     });
 
-    await batch.commit();
-    return true;
+    if (error) {
+      throw new Error(`フレーズの保存に失敗しました: ${error.message}`);
+    }
   }
 
-  async search(queryText: string): Promise<Phrase[]> {
-    const normalized = queryText.trim().toLowerCase();
-    if (!normalized) {
-      return this.findAll();
+
+  async delete(id: string): Promise<void> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('認証されていません');
     }
 
-    const snapshot = await getDocs(
-      query(this.collection, orderBy('updatedAt', 'desc'))
-    );
-    return snapshot.docs
-      .map(doc => this.docToEntity(doc.data(), doc.id))
-      .filter(phrase => {
-        const note = phrase.note ?? '';
-        return (
-          phrase.text.toLowerCase().includes(normalized) ||
-          note.toLowerCase().includes(normalized)
-        );
-      });
-  }
+    // phrase_tagsのON DELETE CASCADEにより、phrasesレコード削除時に自動削除される
+    const { error } = await supabase
+      .from(this.tableName)
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.user.id);
 
-  async findByTagId(tagId: string): Promise<Phrase[]> {
-    const phraseRefs = await getDocs(userCollection('tags', tagId, 'phraseRefs'));
-    const phraseIds = phraseRefs.docs.map(doc => doc.id);
-    return this.fetchPhrasesByIds(phraseIds);
+    if (error) {
+      throw new Error(`フレーズの削除に失敗しました: ${error.message}`);
+    }
   }
 }
 

@@ -1,103 +1,103 @@
-// Repository implementation
-import { Folder } from '@lyrics-notes/core';
-import {
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  setDoc,
-  Timestamp,
-  where,
-  writeBatch,
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { userCollection, userDoc } from './utils/firestorePaths';
+import { Folder, FolderRepository as IFolderRepository, EntityId } from '@lyrics-notes/core';
+import { supabase } from '@/lib/supabase/client';
+import { getCurrentUserId } from '@/lib/supabase/auth';
 
-type FolderDocument = {
+type FolderRow = {
   id: string;
+  user_id: string;
   name: string;
-  orderIndex: number;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
 };
 
-export class FolderRepository {
-  private get collection() {
-    return userCollection<FolderDocument>('folders');
-  }
-
-  private docToEntity(data: FolderDocument, id: string): Folder {
-    return new Folder(
-      id,
-      data.name,
-      data.orderIndex,
-      data.createdAt.toDate(),
-      data.updatedAt.toDate()
+export class FolderRepository implements IFolderRepository {
+  private docToEntity(row: FolderRow): Folder {
+    return Folder.reconstruct(
+      EntityId.from(row.id),
+      row.name,
+      row.order_index
     );
   }
 
-  async findAll(): Promise<Folder[]> {
-    const snapshot = await getDocs(
-      query(this.collection, orderBy('orderIndex', 'asc'))
-    );
-    return snapshot.docs.map(doc => this.docToEntity(doc.data(), doc.id));
-  }
+  async findById(id: EntityId): Promise<Folder | null> {
+    const userId = await getCurrentUserId();
 
-  async findById(id: string): Promise<Folder | null> {
-    const docRef = userDoc<FolderDocument>('folders', id);
-    const snapshot = await getDoc(docRef);
-    if (!snapshot.exists()) {
+    const { data, error } = await supabase
+      .from('folders')
+      .select('*')
+      .eq('id', id as string)
+      .eq('user_id', userId)
+      .single();
+
+    if (error || !data) {
       return null;
     }
-    return this.docToEntity(snapshot.data() as FolderDocument, snapshot.id);
+
+    return this.docToEntity(data);
   }
 
   async save(folder: Folder): Promise<void> {
-    const docRef = userDoc<FolderDocument>('folders', folder.id);
-    const payload: FolderDocument = {
-      id: folder.id,
+    const userId = await getCurrentUserId();
+    const now = new Date().toISOString();
+
+    // 既存のフォルダかチェック
+    const { data: existing } = await supabase
+      .from('folders')
+      .select('created_at')
+      .eq('id', folder.id as string)
+      .eq('user_id', userId)
+      .single();
+
+    const payload = {
+      id: folder.id as string,
+      user_id: userId,
       name: folder.name,
-      orderIndex: folder.orderIndex,
-      createdAt: Timestamp.fromDate(folder.createdAt),
-      updatedAt: Timestamp.fromDate(folder.updatedAt),
+      order_index: folder.orderIndex,
+      created_at: existing?.created_at || now,
+      updated_at: now,
     };
-    await setDoc(docRef, payload, { merge: true });
+
+    const { error } = await supabase
+      .from('folders')
+      .upsert(payload);
+
+    if (error) {
+      throw new Error(`フォルダの保存に失敗しました: ${error.message}`);
+    }
   }
 
-  async delete(id: string): Promise<boolean> {
-    const docRef = userDoc<FolderDocument>('folders', id);
-    const snapshot = await getDoc(docRef);
-    if (!snapshot.exists()) {
-      return false;
-    }
+  async reorder(folderIds: EntityId[]): Promise<void> {
+    const userId = await getCurrentUserId();
+    const now = new Date().toISOString();
 
-    const batch = writeBatch(db);
-    const projectsSnapshot = await getDocs(
-      query(userCollection('projects'), where('folderId', '==', id))
+    // Supabaseではバッチ更新の代わりに個別に更新
+    const updates = folderIds.map((folderId, index) =>
+      supabase
+        .from('folders')
+        .update({
+          order_index: index + 1, // 1から開始
+          updated_at: now
+        })
+        .eq('id', folderId as string)
+        .eq('user_id', userId)
     );
 
-    const now = Timestamp.fromDate(new Date());
-    projectsSnapshot.forEach(projectDoc => {
-      batch.update(projectDoc.ref, { folderId: null, updatedAt: now });
-    });
-
-    batch.delete(docRef);
-    await batch.commit();
-    return true;
+    await Promise.all(updates);
   }
 
-  async reorder(folderIds: string[]): Promise<void> {
-    const batch = writeBatch(db);
-    const now = Timestamp.fromDate(new Date());
+  async delete(id: EntityId): Promise<void> {
+    const userId = await getCurrentUserId();
 
-    folderIds.forEach((folderId, index) => {
-      const folderRef = userDoc('folders', folderId);
-      batch.update(folderRef, { orderIndex: index, updatedAt: now });
+    // PostgreSQL関数を呼び出し（トランザクション内で実行される）
+    const { error } = await supabase.rpc('delete_folder_with_projects', {
+      p_folder_id: id as string,
+      p_user_id: userId,
     });
 
-    await batch.commit();
+    if (error) {
+      throw new Error(`フォルダの削除に失敗しました: ${error.message}`);
+    }
   }
 }
 
