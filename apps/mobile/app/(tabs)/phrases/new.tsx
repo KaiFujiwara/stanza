@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
+import { TagSelector } from "@/components/phrases/TagSelector";
 import { HeaderActionButton } from "@/components/shared/HeaderActionButton";
 import { TextInput } from "@/components/shared/TextInput";
-import { TagSelector } from "@/components/phrases/TagSelector";
 import { usePhrases } from "@/hooks/phrase";
+import { MaterialIcons } from "@expo/vector-icons";
+import { MAX_PHRASE_NOTE_LENGTH, MAX_PHRASE_TEXT_LENGTH } from "@lyrics-notes/core";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NewPhraseScreen() {
   const router = useRouter();
@@ -35,7 +36,8 @@ export default function NewPhraseScreen() {
         },
         onError: (error) => {
           console.error('[NewPhrase] フレーズ作成エラー:', error);
-          Alert.alert('エラー', 'フレーズの作成に失敗しました');
+          const errorMessage = error instanceof Error ? error.message : 'フレーズの作成に失敗しました';
+          Alert.alert('エラー', errorMessage);
         },
       }
     );
@@ -88,8 +90,7 @@ export default function NewPhraseScreen() {
               autoFocus
               onSubmitEditing={handleCreatePhrase}
               editable={!isCreating}
-              isEditing={false}
-              maxLength={500}
+              maxLength={MAX_PHRASE_TEXT_LENGTH}
               showCharCount
               helperText=""
             />
@@ -104,8 +105,7 @@ export default function NewPhraseScreen() {
               onChangeText={setPhraseNote}
               placeholder="例: Aメロで使えそう、韻を踏んでいる など"
               editable={!isCreating}
-              isEditing={false}
-              maxLength={500}
+              maxLength={MAX_PHRASE_NOTE_LENGTH}
               showCharCount
               helperText=""
             />

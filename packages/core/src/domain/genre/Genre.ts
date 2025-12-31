@@ -1,6 +1,6 @@
 import { EntityId } from '../shared/EntityId';
-import { GenreDescription } from './vo/GenreDescription';
-import { GenreName } from './vo/GenreName';
+import { GenreDescription, GenreDescriptionValue } from './vo/GenreDescription';
+import { GenreName, GenreNameValue } from './vo/GenreName';
 import { GenreTemplateSection } from './GenreTemplateSection';
 
 // ドメインエンティティ：Genre（ユーザーのジャンルテンプレ）
@@ -8,8 +8,8 @@ export class Genre {
   private static readonly MAX_TEMPLATE_SECTIONS = 20;
 
   private _id: EntityId;
-  private _name: string;
-  private _description?: string;
+  private _name: GenreNameValue;
+  private _description?: GenreDescriptionValue;
   private _templateSections: GenreTemplateSection[];
 
   private constructor(
@@ -28,11 +28,11 @@ export class Genre {
     return this._id;
   }
 
-  get name(): string {
+  get name(): GenreNameValue {
     return this._name;
   }
 
-  get description(): string | undefined {
+  get description(): GenreDescriptionValue | undefined {
     return this._description;
   }
 

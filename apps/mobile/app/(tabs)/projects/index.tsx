@@ -1,7 +1,6 @@
 import { EmptyState } from "@/components/EmptyState";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { HelpModal } from "@/components/HelpModal";
-import { CreateProjectModal } from "@/components/projects/CreateProjectModal";
 import { FolderTabList } from "@/components/projects/FolderTabList";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ScreenHeader } from "@/components/ScreenHeader";
@@ -24,16 +23,7 @@ export default function ProjectsScreen() {
     filteredProjects,
   } = useProjectsOverview();
 
-  const [projectModalVisible, setProjectModalVisible] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
-  const [newProjectTitle, setNewProjectTitle] = useState("");
-
-  // 新規プロジェクト作成
-  const handleCreateProject = async () => {
-    // TODO: リポジトリ経由で作成処理を実装
-    setNewProjectTitle("");
-    setProjectModalVisible(false);
-  };
 
 
   const renderProject = ({ item }: { item: ProjectListItem }) => (
@@ -86,14 +76,6 @@ export default function ProjectsScreen() {
         onRefresh={loadOverview}
       />
 
-      <CreateProjectModal
-        visible={projectModalVisible}
-        onClose={() => setProjectModalVisible(false)}
-        onSubmit={handleCreateProject}
-        title={newProjectTitle}
-        onTitleChange={setNewProjectTitle}
-      />
-
       <HelpModal
         visible={helpModalVisible}
         onClose={() => setHelpModalVisible(false)}
@@ -101,7 +83,7 @@ export default function ProjectsScreen() {
         content="歌詞プロジェクトは、楽曲ごとに歌詞を管理する機能です。プロジェクトを作成すると、歌詞のバージョン管理や音数カウント、韻チェックなどの機能を利用できます。&#10;&#10;下部の + ボタンから新しいプロジェクトを作成できます。"
       />
 
-      <FloatingActionButton onPress={() => setProjectModalVisible(true)} />
+      <FloatingActionButton onPress={() => {/* TODO: プロジェクト作成画面に遷移 */}} />
     </SafeAreaView>
   );
 }

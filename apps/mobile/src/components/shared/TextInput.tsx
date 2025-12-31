@@ -10,7 +10,6 @@ interface TextInputProps {
   onSubmitEditing?: () => void;
   onBlur?: () => void;
   editable?: boolean;
-  isEditing?: boolean;
   maxLength?: number;
   showCharCount?: boolean;
   helperText?: string;
@@ -24,7 +23,6 @@ export function TextInput({
   onSubmitEditing,
   onBlur,
   editable = true,
-  isEditing = true,
   maxLength = DEFAULT_MAX_LENGTH,
   showCharCount = true,
   helperText,
@@ -49,9 +47,7 @@ export function TextInput({
         onSubmitEditing={onSubmitEditing}
         onBlur={onBlur}
         returnKeyType="done"
-        className={`bg-gray-50 rounded-lg px-4 py-3 border text-base text-gray-900 ${
-          isEditing ? 'border-green-500' : 'border-gray-200'
-        }`}
+        className="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200 text-base text-gray-900"
         style={{ fontSize: 16, minHeight: 44 }}
         editable={editable}
         maxLength={maxLength}

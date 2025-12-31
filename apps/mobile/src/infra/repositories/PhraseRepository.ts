@@ -36,10 +36,10 @@ export class PhraseRepository implements PhraseRepositoryPort {
       .eq('phrase_id', phraseId);
 
     if (error) {
-      throw new Error(`フレーズのタグ取得に失敗しました: ${error.message}`);
+      throw new Error('Failed to fetch phrase tags', { cause: error });
     }
 
-    return (data as { tag_id: string }[]).map((row) => row.tag_id);
+    return (data as Pick<PhraseTagRow, 'tag_id'>[]).map((row) => row.tag_id);
   }
 
   /**
@@ -54,16 +54,16 @@ export class PhraseRepository implements PhraseRepositoryPort {
     );
   }
 
-  async findById(id: string): Promise<Phrase | null> {
+  async findById(id: EntityId): Promise<Phrase | null> {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) {
-      throw new Error('認証されていません');
+      throw new Error('User not authenticated');
     }
 
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
-      .eq('id', id)
+      .eq('id', id as string)
       .eq('user_id', user.user.id)
       .single();
 
@@ -72,17 +72,17 @@ export class PhraseRepository implements PhraseRepositoryPort {
         // Not found
         return null;
       }
-      throw new Error(`フレーズの取得に失敗しました: ${error.message}`);
+      throw new Error('Failed to fetch phrase', { cause: error });
     }
 
-    const tagIds = await this.getTagIds(id);
+    const tagIds = await this.getTagIds(id as string);
     return this.rowToEntity(data as PhraseRow, tagIds);
   }
 
   async save(phrase: Phrase): Promise<void> {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) {
-      throw new Error('認証されていません');
+      throw new Error('User not authenticated');
     }
 
     // トランザクション内で実行
@@ -95,27 +95,45 @@ export class PhraseRepository implements PhraseRepositoryPort {
     });
 
     if (error) {
-      throw new Error(`フレーズの保存に失敗しました: ${error.message}`);
+      throw new Error('Failed to save phrase', { cause: error });
     }
   }
 
 
-  async delete(id: string): Promise<void> {
+  async delete(id: EntityId): Promise<void> {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) {
-      throw new Error('認証されていません');
+      throw new Error('User not authenticated');
     }
 
     // phrase_tagsのON DELETE CASCADEにより、phrasesレコード削除時に自動削除される
     const { error } = await supabase
       .from(this.tableName)
       .delete()
-      .eq('id', id)
+      .eq('id', id as string)
       .eq('user_id', user.user.id);
 
     if (error) {
-      throw new Error(`フレーズの削除に失敗しました: ${error.message}`);
+      throw new Error('Failed to delete phrase', { cause: error });
     }
+  }
+
+  async countByUser(): Promise<number> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { count, error } = await supabase
+      .from(this.tableName)
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.user.id);
+
+    if (error) {
+      throw new Error('Failed to count phrases', { cause: error });
+    }
+
+    return count ?? 0;
   }
 }
 

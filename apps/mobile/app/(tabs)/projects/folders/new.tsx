@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { TextInput } from "@/components/shared/TextInput";
 import { HeaderActionButton } from "@/components/shared/HeaderActionButton";
-import { useFolders, useCreateFolder } from "@/hooks/folder";
+import { TextInput } from "@/components/shared/TextInput";
+import { useCreateFolder } from "@/hooks/folder";
+import { MaterialIcons } from "@expo/vector-icons";
+import { MAX_FOLDER_NAME_LENGTH } from "@lyrics-notes/core";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NewFolderScreen() {
   const router = useRouter();
   const [folderName, setFolderName] = useState("");
 
-  const { data: folders = [] } = useFolders();
   const createMutation = useCreateFolder();
 
   // フォルダを作成
@@ -21,17 +21,10 @@ export default function NewFolderScreen() {
       return;
     }
 
-    try {
-      const maxOrderIndex = folders.reduce((max, f) => Math.max(max, f.orderIndex), 0);
-      await createMutation.mutateAsync({
-        name: folderName.trim(),
-        orderIndex: maxOrderIndex + 1,
-      });
-      router.back();
-    } catch (error) {
-      console.error('[NewFolder] フォルダ作成エラー:', error);
-      Alert.alert('エラー', 'フォルダの作成に失敗しました');
-    }
+    await createMutation.mutateAsync({
+      name: folderName.trim(),
+    });
+    router.back();
   };
 
   return (
@@ -72,7 +65,8 @@ export default function NewFolderScreen() {
               autoFocus
               onSubmitEditing={handleCreateFolder}
               editable={!createMutation.isPending}
-              isEditing={false}
+              maxLength={MAX_FOLDER_NAME_LENGTH}
+              showCharCount
               helperText=""
             />
             <Text className="text-xs text-gray-500 mt-2">

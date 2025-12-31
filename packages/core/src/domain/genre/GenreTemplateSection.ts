@@ -1,11 +1,11 @@
 import { EntityId } from '../shared/EntityId';
-import { TemplateSectionName } from './vo/TemplateSectionName';
+import { TemplateSectionName, TemplateSectionNameValue } from './vo/TemplateSectionName';
 
 // ドメインエンティティ：GenreTemplateSection
 export class GenreTemplateSection {
   private _id: EntityId;
   private _genreId: EntityId;
-  private _name: string;
+  private _name: TemplateSectionNameValue;
   private _orderIndex: number;
 
   private constructor(
@@ -28,7 +28,7 @@ export class GenreTemplateSection {
     return this._genreId;
   }
 
-  get name(): string {
+  get name(): TemplateSectionNameValue {
     return this._name;
   }
 

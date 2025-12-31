@@ -7,6 +7,7 @@ import { HeaderActionButton } from "@/components/shared/HeaderActionButton";
 import { TextInput } from "@/components/shared/TextInput";
 import { TagSelector } from "@/components/phrases/TagSelector";
 import { usePhraseDetail } from "@/hooks/phrase";
+import { MAX_PHRASE_TEXT_LENGTH, MAX_PHRASE_NOTE_LENGTH } from "@lyrics-notes/core";
 
 export default function PhraseDetailScreen() {
   const router = useRouter();
@@ -47,16 +48,11 @@ export default function PhraseDetailScreen() {
       return;
     }
 
-    try {
-      await updatePhrase({
-        text: editText.trim(),
-        note: editNote.trim() || undefined,
-        tagIds: selectedTagIds,
-      });
-    } catch (error) {
-      console.error('[PhraseDetail] フレーズ更新エラー:', error);
-      Alert.alert('エラー', 'フレーズの更新に失敗しました');
-    }
+    await updatePhrase({
+      text: editText.trim(),
+      note: editNote.trim() || undefined,
+      tagIds: selectedTagIds,
+    });
   };
 
   // フレーズ削除
@@ -72,13 +68,8 @@ export default function PhraseDetailScreen() {
           text: '削除',
           style: 'destructive',
           onPress: async () => {
-            try {
-              await deletePhrase();
-              router.back();
-            } catch (error) {
-              console.error('[PhraseDetail] フレーズ削除エラー:', error);
-              Alert.alert('エラー', 'フレーズの削除に失敗しました');
-            }
+            await deletePhrase();
+            router.back();
           },
         },
       ]
@@ -146,8 +137,7 @@ export default function PhraseDetailScreen() {
                   onChangeText={setEditText}
                   placeholder="フレーズ本文を入力"
                   editable={!isUpdating}
-                  isEditing={!!hasChanges}
-                  maxLength={500}
+                  maxLength={MAX_PHRASE_TEXT_LENGTH}
                   showCharCount
                 />
               </View>
@@ -160,8 +150,7 @@ export default function PhraseDetailScreen() {
                   onChangeText={setEditNote}
                   placeholder="メモを入力（任意）"
                   editable={!isUpdating}
-                  isEditing={!!hasChanges}
-                  maxLength={500}
+                  maxLength={MAX_PHRASE_NOTE_LENGTH}
                   showCharCount
                 />
               </View>

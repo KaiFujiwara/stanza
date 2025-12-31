@@ -39,12 +39,16 @@ export default function SettingsScreen() {
     router.push("/settings/contact");
   };
 
-  const handleLicense = () => {
-    router.push("/settings/license");
-  };
-
   const handleVersion = () => {
     router.push("/settings/version");
+  };
+
+  const handleTerms = () => {
+    router.push("/settings/terms");
+  };
+
+  const handlePrivacy = () => {
+    router.push("/settings/privacy");
   };
 
   const sections: SettingSection[] = [
@@ -91,9 +95,15 @@ export default function SettingsScreen() {
       title: "アプリ情報",
       items: [
         {
-          icon: "description",
-          title: "ライセンス情報",
-          onPress: handleLicense,
+          icon: "gavel",
+          title: "利用規約",
+          onPress: handleTerms,
+          showChevron: true,
+        },
+        {
+          icon: "privacy-tip",
+          title: "プライバシーポリシー",
+          onPress: handlePrivacy,
           showChevron: true,
         },
         {

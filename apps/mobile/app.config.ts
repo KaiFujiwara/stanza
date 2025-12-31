@@ -26,6 +26,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   scheme: 'lyricsnotes',
   userInterfaceStyle: 'automatic',
+  icon: './assets/images/icon.png',
   ios: {
     bundleIdentifier: getUniqueIdentifier(),
     infoPlist: {
@@ -52,7 +53,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     // アプリ設定
     appName: 'Stanza',
-    supportEmail: 'support@example.com', // TODO: 実際のメールアドレスに変更
+    supportEmail: 'stanza.app.contact@gmail.com',
   },
-  owner: 'somedon',
+  owner: 'kaifujiwara',
 });

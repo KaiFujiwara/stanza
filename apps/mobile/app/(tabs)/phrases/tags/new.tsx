@@ -5,8 +5,9 @@ import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { TextInput } from '@/components/shared/TextInput';
 import { HeaderActionButton } from '@/components/shared/HeaderActionButton';
-import { useCreateTag } from '@/hooks/tag';
+import { useCreateTag, useTags } from '@/hooks/tag';
 import { TAG_COLOR_PRESETS } from '@/constants/tagColors';
+import { MAX_TAG_NAME_LENGTH } from '@lyrics-notes/core';
 
 export default function NewTagScreen() {
   const router = useRouter();
@@ -21,15 +22,11 @@ export default function NewTagScreen() {
       return;
     }
 
-    try {
-      await createTag({
-        name: tagName.trim(),
-        color: selectedColor ?? undefined,
-      });
-      router.back();
-    } catch (error) {
-      Alert.alert('エラー', 'タグの作成に失敗しました');
-    }
+    await createTag({
+      name: tagName.trim(),
+      color: selectedColor ?? undefined,
+    });
+    router.back();
   };
 
   return (
@@ -71,8 +68,7 @@ export default function NewTagScreen() {
                 autoFocus
                 onSubmitEditing={handleCreateTag}
                 editable={!isCreating}
-                isEditing={false}
-                maxLength={20}
+                maxLength={MAX_TAG_NAME_LENGTH}
                 showCharCount
                 helperText=""
               />

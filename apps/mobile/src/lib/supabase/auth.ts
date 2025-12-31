@@ -27,7 +27,7 @@ export async function ensureAnonymousAuth(): Promise<void> {
   const { error } = await supabase.auth.signInAnonymously();
 
   if (error) {
-    throw new Error(`匿名認証に失敗しました: ${error.message}`);
+    throw new Error('Failed to sign in anonymously', { cause: error });
   }
 }
 
@@ -40,11 +40,11 @@ export async function getCurrentUserId(): Promise<string> {
   const { data: { session }, error } = await supabase.auth.getSession();
 
   if (error) {
-    throw new Error(`セッション取得に失敗: ${error.message}`);
+    throw new Error('User not authenticated', { cause: error });
   }
 
   if (!session?.user) {
-    throw new Error('ユーザーが認証されていません');
+    throw new Error('User not authenticated');
   }
 
   return session.user.id;

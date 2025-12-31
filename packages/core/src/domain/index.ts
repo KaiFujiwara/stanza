@@ -2,12 +2,15 @@
 // Shared
 // ============================================================================
 export * from './shared/EntityId';
+export * from './shared/errors/ErrorCode';
+export * from './shared/errors/DomainError';
 
 // ============================================================================
 // Folder
 // ============================================================================
 export * from './folder/Folder';
 export * from './folder/FolderRepository';
+export * from './folder/FolderDomainService';
 export * from './folder/vo/FolderName';
 
 // ============================================================================
@@ -25,6 +28,7 @@ export * from './genre/vo/TemplateSectionName';
 // ============================================================================
 export * from './phrase/Phrase';
 export * from './phrase/PhraseRepository';
+export * from './phrase/PhraseDomainService';
 export * from './phrase/vo/PhraseNote';
 export * from './phrase/vo/PhraseText';
 
@@ -43,6 +47,7 @@ export * from './project/vo/LineText';
 // ============================================================================
 export * from './tag/Tag';
 export * from './tag/TagRepository';
+export * from './tag/TagDomainService';
 export * from './tag/vo/TagColor';
 export * from './tag/vo/TagName';
 

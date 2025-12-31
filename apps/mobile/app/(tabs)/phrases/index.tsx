@@ -1,6 +1,7 @@
 import { EmptyState } from "@/components/EmptyState";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { HelpModal } from "@/components/HelpModal";
+import { ItemCountBadge } from "@/components/ItemCountBadge";
 import { PhraseCard } from "@/components/phrases/PhraseCard";
 import { PhraseSearchBar } from "@/components/phrases/PhraseSearchBar";
 import { PhraseSortSelector, SortOrder } from "@/components/phrases/PhraseSortSelector";
@@ -24,6 +25,9 @@ export default function PhrasesScreen() {
     setSearchText,
     selectedTagIds,
     setSelectedTagIds,
+    canCreate,
+    currentCount,
+    maxCount,
   } = usePhrases();
 
   const [helpModalVisible, setHelpModalVisible] = useState(false);
@@ -129,7 +133,7 @@ export default function PhrasesScreen() {
         visible={helpModalVisible}
         onClose={() => setHelpModalVisible(false)}
         title="フレーズについて"
-        content="フレーズストックは、思いついた歌詞のフレーズを保存しておく機能です。気に入ったフレーズをストックしておき、後で歌詞制作に活用できます。&#10;&#10;タグ整理することで、必要な時にすぐに見つけられます。"
+        content="フレーズストックは、思いついた歌詞のフレーズを保存しておく機能です。気に入ったフレーズをストックしておき、後で歌詞制作に活用できます。&#10;&#10;タグ整理することで、必要な時にすぐに見つけられます。&#10;&#10;フレーズは最大200個まで作成できます。"
       />
 
       <TagFilterModal
@@ -139,7 +143,9 @@ export default function PhrasesScreen() {
         onTagToggle={handleTagToggle}
       />
 
-      <FloatingActionButton onPress={() => router.push('/phrases/new')} />
+      <FloatingActionButton onPress={() => router.push('/phrases/new')} disabled={!canCreate} />
+
+      <ItemCountBadge currentCount={currentCount} maxCount={maxCount} />
     </SafeAreaView>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -8,27 +8,25 @@ import DraggableFlatList, {
 } from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { FloatingActionButton } from "@/components/FloatingActionButton";
+import { HelpModal } from "@/components/HelpModal";
+import { ItemCountBadge } from "@/components/ItemCountBadge";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { FolderWithCount } from '@/infra/query/folder';
 import { useFolders, useReorderFolders } from "@/hooks/folder";
 
 export default function FoldersEditScreen() {
   const router = useRouter();
   const [isReorderMode, setIsReorderMode] = useState(false);
+  const [helpModalVisible, setHelpModalVisible] = useState(false);
 
   // React Queryでフォルダ一覧を取得
-  const { data: folders = [], isLoading } = useFolders();
+  const { data: folders = [], isLoading, refetch, isRefetching, canCreate, currentCount, maxCount } = useFolders();
   const reorderMutation = useReorderFolders();
 
   // フォルダ並び替え
   const handleReorder = async (data: FolderWithCount[]) => {
     const folderIds = data.map(f => f.id);
-
-    try {
-      await reorderMutation.mutateAsync(folderIds);
-    } catch (error) {
-      console.error('[FoldersEdit] フォルダ並び替えエラー:', error);
-      Alert.alert('エラー', 'フォルダの並び替えに失敗しました');
-    }
+    await reorderMutation.mutateAsync(folderIds);
   };
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<FolderWithCount>) => {
@@ -72,36 +70,34 @@ export default function FoldersEditScreen() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-          {/* ヘッダー */}
-          <View className="px-5 py-4 border-b border-gray-200">
-            <View className="flex-row items-center">
-              <TouchableOpacity onPress={() => router.back()} className="mr-3" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <MaterialIcons name="chevron-left" size={28} color="#111827" />
-              </TouchableOpacity>
-              <Text className="text-2xl font-bold text-gray-900 flex-1" numberOfLines={1}>
-                フォルダ管理
+        <ScreenHeader
+          title="フォルダ管理"
+          showBackButton
+          onBackPress={() => router.back()}
+          showHelpButton
+          onHelpPress={() => setHelpModalVisible(true)}
+          rightButton={
+            <TouchableOpacity
+              onPress={() => setIsReorderMode(!isReorderMode)}
+              className={`ml-2 px-4 py-2 rounded-full flex-row items-center gap-1 ${
+                isReorderMode ? 'bg-green-500' : folders.length >= 2 ? 'bg-gray-200' : 'bg-gray-100'
+              }`}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              disabled={folders.length < 2}
+            >
+              <MaterialIcons
+                name={isReorderMode ? 'check' : 'swap-vert'}
+                size={16}
+                color={isReorderMode ? '#FFFFFF' : folders.length >= 2 ? '#374151' : '#D1D5DB'}
+              />
+              <Text className={`text-sm font-semibold ${
+                isReorderMode ? 'text-white' : folders.length >= 2 ? 'text-gray-700' : 'text-gray-300'
+              }`}>
+                {isReorderMode ? '完了' : '並び替え'}
               </Text>
-              <TouchableOpacity
-                onPress={() => setIsReorderMode(!isReorderMode)}
-                className={`ml-2 px-4 py-2 rounded-full flex-row items-center gap-1 ${
-                  isReorderMode ? 'bg-green-500' : folders.length >= 2 ? 'bg-gray-200' : 'bg-gray-100'
-                }`}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                disabled={folders.length < 2}
-              >
-                <MaterialIcons
-                  name={isReorderMode ? 'check' : 'swap-vert'}
-                  size={16}
-                  color={isReorderMode ? '#FFFFFF' : folders.length >= 2 ? '#374151' : '#D1D5DB'}
-                />
-                <Text className={`text-sm font-semibold ${
-                  isReorderMode ? 'text-white' : folders.length >= 2 ? 'text-gray-700' : 'text-gray-300'
-                }`}>
-                  {isReorderMode ? '完了' : '並び替え'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+            </TouchableOpacity>
+          }
+        />
 
         {/* フォルダ一覧 */}
         <DraggableFlatList
@@ -112,6 +108,14 @@ export default function FoldersEditScreen() {
           containerStyle={{ flex: 1 }}
           contentContainerStyle={{ flexGrow: 1 }}
           ListHeaderComponent={null}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor="#22C55E"
+              colors={["#22C55E"]}
+            />
+          }
           ListEmptyComponent={
             !isLoading ? (
               <View className="flex-1 items-center justify-center p-8">
@@ -128,7 +132,16 @@ export default function FoldersEditScreen() {
         />
 
         {/* 右下のFAB - 並び替えモード時は非表示 */}
-        {!isReorderMode && <FloatingActionButton onPress={() => router.push('/projects/folders/new')} />}
+        {!isReorderMode && <FloatingActionButton onPress={() => router.push('/projects/folders/new')} disabled={!canCreate} />}
+
+        <ItemCountBadge currentCount={currentCount} maxCount={maxCount} />
+
+        <HelpModal
+          visible={helpModalVisible}
+          onClose={() => setHelpModalVisible(false)}
+          title="フォルダについて"
+          content="フォルダは、プロジェクトを整理・分類するための機能です。アルバムやテーマごとにプロジェクトをまとめて管理できます。&#10;&#10;フォルダは最大10個まで作成できます。並び替えボタンでフォルダの表示順序を変更できます。"
+        />
       </SafeAreaView>
     </GestureHandlerRootView>
   );

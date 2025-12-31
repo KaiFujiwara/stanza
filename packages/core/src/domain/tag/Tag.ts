@@ -1,11 +1,11 @@
-import { TagName } from './vo/TagName';
-import { TagColor } from './vo/TagColor';
 import { EntityId } from '../shared/EntityId';
+import { TagColor, TagColorValue } from './vo/TagColor';
+import { TagName, TagNameValue } from './vo/TagName';
 
 export class Tag {
   private _id: EntityId;
-  private _name: string;
-  private _color?: string;
+  private _name: TagNameValue;
+  private _color?: TagColorValue;
 
   private constructor(
     id: EntityId,
@@ -21,11 +21,11 @@ export class Tag {
     return this._id;
   }
 
-  get name(): string {
+  get name(): TagNameValue {
     return this._name;
   }
 
-  get color(): string | undefined {
+  get color(): TagColorValue | undefined {
     return this._color;
   }
 
@@ -57,5 +57,4 @@ export class Tag {
     const validatedColor = TagColor.validate(color);
     this._color = validatedColor;
   }
-
 }

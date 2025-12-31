@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
-import { TextInput } from '@/components/shared/TextInput';
 import { HeaderActionButton } from '@/components/shared/HeaderActionButton';
-import { useTagDetail } from '@/hooks/tag';
+import { TextInput } from '@/components/shared/TextInput';
 import { TAG_COLOR_PRESETS } from '@/constants/tagColors';
+import { useTagDetail } from '@/hooks/tag';
+import { MaterialIcons } from '@expo/vector-icons';
+import { MAX_TAG_NAME_LENGTH } from '@lyrics-notes/core';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EditTagScreen() {
   const router = useRouter();
@@ -33,15 +34,11 @@ export default function EditTagScreen() {
       return;
     }
 
-    try {
-      await updateTag({
-        name: tagName.trim(),
-        color: selectedColor ?? undefined,
-      });
-      router.back();
-    } catch (error) {
-      Alert.alert('エラー', 'タグの更新に失敗しました');
-    }
+    await updateTag({
+      name: tagName.trim(),
+      color: selectedColor ?? undefined,
+    });
+    router.back();
   };
 
   const handleDeleteTag = () => {
@@ -54,12 +51,8 @@ export default function EditTagScreen() {
           text: '削除',
           style: 'destructive',
           onPress: async () => {
-            try {
-              await deleteTag();
-              router.back();
-            } catch (error) {
-              Alert.alert('エラー', 'タグの削除に失敗しました');
-            }
+            await deleteTag();
+            router.back();
           },
         },
       ]
@@ -123,8 +116,7 @@ export default function EditTagScreen() {
                 onChangeText={setTagName}
                 placeholder="例: ラブソング"
                 editable={!isUpdating && !isDeleting}
-                isEditing={!!hasChanges}
-                maxLength={20}
+                maxLength={MAX_TAG_NAME_LENGTH}
                 showCharCount
                 helperText=""
               />

@@ -19,8 +19,8 @@
 
 1. **リポジトリ取得**
    ```bash
-   git clone https://github.com/somedon/lyrics-notes.git
-   cd lyrics-notes
+   git clone https://github.com/kaifujiwara/stanza.git
+   cd stanza
    ```
 
 2. **依存関係をインストール**
@@ -79,9 +79,3 @@ npx tsc --noEmit     # 単体実行したいとき
 ## 📱 ビルド & リリース
 
 アプリのビルドとリリースの詳細な手順については [docs/release-process.md](docs/release-process.md) を参照してください。
-
-```bash
-npm run build:ios:dev   # EAS dev profile
-npm run build:ios:prod  # EAS production profile
-npm run submit:ios:prod # App Store 提出
-```

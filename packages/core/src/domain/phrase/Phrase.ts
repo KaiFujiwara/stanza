@@ -1,12 +1,12 @@
-import { PhraseText } from './vo/PhraseText';
-import { PhraseNote } from './vo/PhraseNote';
+import { PhraseText, PhraseTextValue } from './vo/PhraseText';
+import { PhraseNote, PhraseNoteValue } from './vo/PhraseNote';
 import { EntityId } from '../shared/EntityId';
 
 // ドメインエンティティ：Phrase
 export class Phrase {
   private _id: EntityId;
-  private _text: string;
-  private _note?: string;
+  private _text: PhraseTextValue;
+  private _note?: PhraseNoteValue;
   private _tagIds: string[];
 
   private constructor(
@@ -27,11 +27,11 @@ export class Phrase {
     return this._id;
   }
 
-  get text(): string {
+  get text(): PhraseTextValue {
     return this._text;
   }
 
-  get note(): string | undefined {
+  get note(): PhraseNoteValue | undefined {
     return this._note;
   }
 

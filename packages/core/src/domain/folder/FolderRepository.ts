@@ -6,4 +6,5 @@ export interface FolderRepository {
   save(folder: Folder): Promise<void>;
   reorder(folderIds: EntityId[]): Promise<void>;
   delete(id: EntityId): Promise<void>;
+  countByUser(): Promise<number>;
 }

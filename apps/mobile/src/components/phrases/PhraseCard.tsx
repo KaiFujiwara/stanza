@@ -33,10 +33,13 @@ export function PhraseCard({ item, onPress }: PhraseCardProps) {
           {displayTags.map((tag) => (
             <View
               key={tag.id}
-              className="px-2 py-1 rounded-full"
-              style={{ backgroundColor: tag.color ?? DEFAULT_TAG_COLOR }}
+              className="px-2 py-1 rounded-full border"
+              style={{ borderColor: tag.color ?? DEFAULT_TAG_COLOR }}
             >
-              <Text className="text-xs font-medium text-gray-700">
+              <Text
+                className="text-xs font-medium"
+                style={{ color: tag.color ?? DEFAULT_TAG_COLOR }}
+              >
                 {tag.name}
               </Text>
             </View>

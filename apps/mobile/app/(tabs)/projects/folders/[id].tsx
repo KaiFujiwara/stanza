@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { TextInput } from "@/components/shared/TextInput";
 import { HeaderActionButton } from "@/components/shared/HeaderActionButton";
-import { useFolders, useUpdateFolderName, useDeleteFolder } from "@/hooks/folder";
+import { TextInput } from "@/components/shared/TextInput";
+import { useDeleteFolder, useFolders, useUpdateFolderName } from "@/hooks/folder";
+import { MaterialIcons } from "@expo/vector-icons";
+import { MAX_FOLDER_NAME_LENGTH } from "@lyrics-notes/core";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FolderDetailScreen() {
   const router = useRouter();
@@ -42,15 +43,10 @@ export default function FolderDetailScreen() {
       return;
     }
 
-    try {
-      await updateMutation.mutateAsync({
-        id,
-        name: editText.trim(),
-      });
-    } catch (error) {
-      console.error('[FolderDetail] フォルダ名変更エラー:', error);
-      Alert.alert('エラー', 'フォルダ名の変更に失敗しました');
-    }
+    await updateMutation.mutateAsync({
+      id,
+      name: editText.trim(),
+    });
   };
 
   // フォルダ削除
@@ -66,13 +62,8 @@ export default function FolderDetailScreen() {
           text: '削除',
           style: 'destructive',
           onPress: async () => {
-            try {
-              await deleteMutation.mutateAsync(id);
-              router.back();
-            } catch (error) {
-              console.error('[FolderDetail] フォルダ削除エラー:', error);
-              Alert.alert('エラー', 'フォルダの削除に失敗しました');
-            }
+            await deleteMutation.mutateAsync(id);
+            router.back();
           },
         },
       ]
@@ -131,7 +122,8 @@ export default function FolderDetailScreen() {
                 placeholder="フォルダ名を入力"
                 autoFocus={false}
                 editable={!updateMutation.isPending}
-                isEditing={!!hasChanges}
+                maxLength={MAX_FOLDER_NAME_LENGTH}
+                showCharCount
               />
 
               <View className="mt-6 flex-row items-center">

@@ -1,10 +1,11 @@
 // Repository implementation
-import {
-  Tag,
-  TagRepository as TagRepositoryPort,
-  EntityId,
-} from '@lyrics-notes/core';
 import { supabase } from '@/lib/supabase/client';
+import {
+  EntityId,
+  Tag,
+  TagNameValue,
+  TagRepository as TagRepositoryPort,
+} from '@lyrics-notes/core';
 
 type TagRow = {
   id: string;
@@ -44,7 +45,7 @@ export class TagRepository implements TagRepositoryPort {
         // Not found
         return null;
       }
-      throw new Error(`Failed to fetch tag: ${error.message}`);
+      throw new Error('Failed to fetch tag', { cause: error });
     }
 
     return this.rowToEntity(data as TagRow);
@@ -69,7 +70,11 @@ export class TagRepository implements TagRepositoryPort {
       .upsert(payload);
 
     if (error) {
-      throw new Error(`Failed to save tag: ${error.message}`);
+      // UNIQUE制約違反（タグ名重複）
+      if (error.code === '23505') {
+        throw new Error(`Duplicate tag name: ${tag.name}`, { cause: error });
+      }
+      throw new Error('Failed to save tag', { cause: error });
     }
   }
 
@@ -87,8 +92,47 @@ export class TagRepository implements TagRepositoryPort {
       .eq('user_id', user.user.id);
 
     if (error) {
-      throw new Error(`Failed to delete tag: ${error.message}`);
+      throw new Error('Failed to delete tag', { cause: error });
     }
+  }
+
+  async countByUser(): Promise<number> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { count, error } = await supabase
+      .from(this.tableName)
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.user.id);
+
+    if (error) {
+      throw new Error('Failed to count tags', { cause: error });
+    }
+
+    return count ?? 0;
+  }
+
+  async existsByName(name: TagNameValue): Promise<boolean> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('User not authenticated');
+    }
+
+    // 完全一致で検索（大文字小文字を区別する）
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('id')
+      .eq('user_id', user.user.id)
+      .eq('name', name)
+      .limit(1);
+
+    if (error) {
+      throw new Error('Failed to check tag name', { cause: error });
+    }
+
+    return (data?.length ?? 0) > 0;
   }
 }
 

@@ -1,9 +1,9 @@
-import { FolderName } from './vo/FolderName';
+import { FolderName, FolderNameValue } from './vo/FolderName';
 import { EntityId } from '../shared/EntityId';
 
 export class Folder {
   private _id: EntityId;
-  private _name: string;
+  private _name: FolderNameValue;
   private _orderIndex: number;
 
   private constructor(
@@ -20,7 +20,7 @@ export class Folder {
     return this._id;
   }
 
-  get name(): string {
+  get name(): FolderNameValue {
     return this._name;
   }
 

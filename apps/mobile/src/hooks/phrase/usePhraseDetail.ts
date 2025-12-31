@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getPhraseDetail } from '@/infra/query/phrase';
-import { phraseRepository } from '@/infra/repositories/PhraseRepository';
 import { phraseKeys } from './usePhrases';
+import { Alert } from 'react-native';
+import { updatePhraseUseCase } from '@/application/usecases/phrase/UpdatePhraseUseCase';
+import { deletePhraseUseCase } from '@/application/usecases/phrase/DeletePhraseUseCase';
 
 /**
  * フレーズ詳細取得用フック
@@ -22,41 +24,27 @@ export function usePhraseDetail(phraseId: string) {
       note?: string;
       tagIds?: string[];
     }) => {
-      const existing = await phraseRepository.findById(phraseId);
-      if (!existing) {
-        throw new Error('フレーズが見つかりません');
-      }
-
-      if (params.text !== undefined) {
-        existing.updateText(params.text);
-      }
-      if (params.note !== undefined) {
-        existing.updateNote(params.note);
-      }
-      if (params.tagIds !== undefined) {
-        existing.setTags(params.tagIds);
-      }
-
-      await phraseRepository.save(existing);
-      return existing;
+      await updatePhraseUseCase.execute({ id: phraseId, ...params });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: phraseKeys.lists() });
       queryClient.invalidateQueries({ queryKey: phraseKeys.detail(phraseId) });
+    },
+    onError: (error: Error) => {
+      Alert.alert('エラー', error.message);
     },
   });
 
   // 削除
   const deletePhraseMutation = useMutation({
     mutationFn: async () => {
-      const phrase = await phraseRepository.findById(phraseId);
-      if (!phrase) {
-        throw new Error('フレーズが見つかりません');
-      }
-      await phraseRepository.delete(phraseId);
+      await deletePhraseUseCase.execute({ id: phraseId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: phraseKeys.lists() });
+    },
+    onError: (error: Error) => {
+      Alert.alert('エラー', error.message);
     },
   });
 

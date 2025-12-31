@@ -1,7 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Tag, EntityId } from '@lyrics-notes/core';
-import { getTags, getTagDetail } from '@/infra/query/tag';
-import { tagRepository } from '@/infra/repositories/TagRepository';
+import { getTagDetail, getTags } from '@/infra/query/tag';
+import { MAX_TAGS_PER_USER } from '@lyrics-notes/core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Alert } from 'react-native';
+import { createTagUseCase } from '@/application/usecases/tag/CreateTagUseCase';
+import { updateTagUseCase } from '@/application/usecases/tag/UpdateTagUseCase';
+import { deleteTagUseCase } from '@/application/usecases/tag/DeleteTagUseCase';
 
 export const tagKeys = {
   all: ['tags'] as const,
@@ -18,10 +21,16 @@ export function useTags() {
     queryFn: getTags,
   });
 
+  const currentCount = tags?.length ?? 0;
+  const canCreate = currentCount < MAX_TAGS_PER_USER;
+
   return {
     tags: tags ?? [],
     loading: isLoading,
     refetch,
+    canCreate,
+    currentCount,
+    maxCount: MAX_TAGS_PER_USER,
   };
 }
 
@@ -33,8 +42,7 @@ export function useCreateTag() {
 
   const createTagMutation = useMutation({
     mutationFn: async (params: { name: string; color?: string }) => {
-      const tag = Tag.create(params.name, params.color);
-      await tagRepository.save(tag);
+      const { tag } = await createTagUseCase.execute(params);
       return tag;
     },
     onSuccess: async () => {
@@ -42,6 +50,9 @@ export function useCreateTag() {
       await queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       // キャッシュを即座にリフレッシュ
       await queryClient.refetchQueries({ queryKey: tagKeys.lists() });
+    },
+    onError: (error: Error) => {
+      Alert.alert('エラー', error.message);
     },
   });
 
@@ -66,19 +77,7 @@ export function useTagDetail(tagId: string) {
   // 更新
   const updateTagMutation = useMutation({
     mutationFn: async (params: { name?: string; color?: string }) => {
-      const tag = await tagRepository.findById(EntityId.from(tagId));
-      if (!tag) {
-        throw new Error('タグが見つかりません');
-      }
-
-      if (params.name !== undefined) {
-        tag.updateName(params.name);
-      }
-      if (params.color !== undefined) {
-        tag.updateColor(params.color);
-      }
-
-      await tagRepository.save(tag);
+      await updateTagUseCase.execute({ id: tagId, ...params });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
@@ -86,21 +85,23 @@ export function useTagDetail(tagId: string) {
       // フレーズ一覧も無効化（タグ名や色が変更されたフレーズの表示を更新）
       queryClient.invalidateQueries({ queryKey: ['phrases'] });
     },
+    onError: (error: Error) => {
+      Alert.alert('エラー', error.message);
+    },
   });
 
   // 削除
   const deleteTagMutation = useMutation({
     mutationFn: async () => {
-      const tag = await tagRepository.findById(EntityId.from(tagId));
-      if (!tag) {
-        throw new Error('タグが見つかりません');
-      }
-      await tagRepository.delete(EntityId.from(tagId));
+      await deleteTagUseCase.execute({ id: tagId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       // フレーズ一覧も無効化（タグが削除されたフレーズの表示を更新）
       queryClient.invalidateQueries({ queryKey: ['phrases'] });
+    },
+    onError: (error: Error) => {
+      Alert.alert('エラー', error.message);
     },
   });
 

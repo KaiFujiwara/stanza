@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Phrase } from '@lyrics-notes/core';
+import { MAX_PHRASES_PER_USER } from '@lyrics-notes/core';
 import { getPhrases } from '@/infra/query/phrase';
-import { phraseRepository } from '@/infra/repositories/PhraseRepository';
+import { Alert } from 'react-native';
 
+import { createPhraseUseCase } from '@/application/usecases/phrase/CreatePhraseUseCase';
+import { updatePhraseUseCase } from '@/application/usecases/phrase/UpdatePhraseUseCase';
+import { deletePhraseUseCase } from '@/application/usecases/phrase/DeletePhraseUseCase';
 export const phraseKeys = {
   all: ['phrases'] as const,
   lists: () => [...phraseKeys.all, 'list'] as const,
@@ -50,15 +53,14 @@ export function usePhrases() {
   // 新規作成
   const createPhraseMutation = useMutation({
     mutationFn: async (params: { text: string; note?: string; tagIds?: string[] }) => {
-      const phrase = Phrase.create(params.text, {
-        note: params.note,
-        tagIds: params.tagIds,
-      });
-      await phraseRepository.save(phrase);
+      const { phrase } = await createPhraseUseCase.execute(params);
       return phrase;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: phraseKeys.lists() });
+    },
+    onError: (error: Error) => {
+      Alert.alert('エラー', error.message);
     },
   });
 
@@ -70,43 +72,32 @@ export function usePhrases() {
       note?: string;
       tagIds?: string[];
     }) => {
-      const existing = await phraseRepository.findById(params.id);
-      if (!existing) {
-        throw new Error('フレーズが見つかりません');
-      }
-
-      if (params.text !== undefined) {
-        existing.updateText(params.text);
-      }
-      if (params.note !== undefined) {
-        existing.updateNote(params.note);
-      }
-      if (params.tagIds !== undefined) {
-        existing.setTags(params.tagIds);
-      }
-
-      await phraseRepository.save(existing);
-      return existing;
+      await updatePhraseUseCase.execute(params);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: phraseKeys.lists() });
       queryClient.invalidateQueries({ queryKey: phraseKeys.detail(variables.id) });
+    },
+    onError: (error: Error) => {
+      Alert.alert('エラー', error.message);
     },
   });
 
   // 削除
   const deletePhraseMutation = useMutation({
     mutationFn: async (id: string) => {
-      const phrase = await phraseRepository.findById(id);
-      if (!phrase) {
-        throw new Error('フレーズが見つかりません');
-      }
-      await phraseRepository.delete(id);
+      await deletePhraseUseCase.execute({ id });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: phraseKeys.lists() });
     },
+    onError: (error: Error) => {
+      Alert.alert('エラー', error.message);
+    },
   });
+
+  const currentCount = allPhrases?.length ?? 0;
+  const canCreate = currentCount < MAX_PHRASES_PER_USER;
 
   return {
     phrases,
@@ -121,6 +112,9 @@ export function usePhrases() {
     deletePhrase: deletePhraseMutation.mutate,
     isCreating: createPhraseMutation.isPending,
     isUpdating: updatePhraseMutation.isPending,
+    canCreate,
     isDeleting: deletePhraseMutation.isPending,
+    currentCount,
+    maxCount: MAX_PHRASES_PER_USER,
   };
 }

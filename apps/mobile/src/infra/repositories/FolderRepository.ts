@@ -39,6 +39,21 @@ export class FolderRepository implements IFolderRepository {
 
   async save(folder: Folder): Promise<void> {
     const userId = await getCurrentUserId();
+
+    // orderIndex が 0 の場合は新規作成として PostgreSQL 関数を使用
+    if (folder.orderIndex === 0) {
+      const { error } = await supabase.rpc('create_folder', {
+        p_user_id: userId,
+        p_name: folder.name,
+      });
+
+      if (error) {
+        throw new Error('Failed to create folder', { cause: error });
+      }
+      return;
+    }
+
+    // orderIndex が 0 以外の場合は既存フォルダの更新
     const now = new Date().toISOString();
 
     // 既存のフォルダかチェック
@@ -63,7 +78,7 @@ export class FolderRepository implements IFolderRepository {
       .upsert(payload);
 
     if (error) {
-      throw new Error(`フォルダの保存に失敗しました: ${error.message}`);
+      throw new Error('Failed to update folder', { cause: error });
     }
   }
 
@@ -83,7 +98,13 @@ export class FolderRepository implements IFolderRepository {
         .eq('user_id', userId)
     );
 
-    await Promise.all(updates);
+    const results = await Promise.all(updates);
+
+    // いずれかの更新でエラーが発生した場合
+    const errors = results.filter(result => result.error);
+    if (errors.length > 0) {
+      throw new Error('Failed to reorder folders', { cause: errors });
+    }
   }
 
   async delete(id: EntityId): Promise<void> {
@@ -96,8 +117,23 @@ export class FolderRepository implements IFolderRepository {
     });
 
     if (error) {
-      throw new Error(`フォルダの削除に失敗しました: ${error.message}`);
+      throw new Error('Failed to delete folder', { cause: error });
     }
+  }
+
+  async countByUser(): Promise<number> {
+    const userId = await getCurrentUserId();
+
+    const { count, error } = await supabase
+      .from('folders')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (error) {
+      throw new Error('Failed to count folders', { cause: error });
+    }
+
+    return count ?? 0;
   }
 }
 
