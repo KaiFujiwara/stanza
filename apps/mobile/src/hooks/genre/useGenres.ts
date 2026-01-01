@@ -1,9 +1,11 @@
 import { getGenreDetail, getGenres } from '@/infra/query/genre';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
-import { createGenreUseCase } from '@/application/usecases/genre/CreateGenreUseCase';
-import { updateGenreUseCase } from '@/application/usecases/genre/UpdateGenreUseCase';
-import { deleteGenreUseCase } from '@/application/usecases/genre/DeleteGenreUseCase';
+import {
+  createGenreUseCase,
+  updateGenreUseCase,
+  deleteGenreUseCase,
+} from '@/application/usecases';
 import { GenreDomainService, MAX_GENRES_PER_USER } from '@lyrics-notes/core';
 
 export const genreKeys = {

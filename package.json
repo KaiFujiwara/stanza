@@ -15,6 +15,8 @@
     "build:ios:prod": "npm run build:ios:prod --workspace=@lyrics-notes/mobile",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:core": "npm run test --workspace=@lyrics-notes/core",
+    "test:mobile": "npm run test --workspace=@lyrics-notes/mobile",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {

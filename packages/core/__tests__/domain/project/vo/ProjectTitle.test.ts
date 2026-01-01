@@ -1,4 +1,5 @@
 import { ProjectTitle } from '../../../../src/domain/project/vo/ProjectTitle';
+import { MAX_PROJECT_TITLE_LENGTH } from '../../../../src/constants/validation';
 
 describe('ProjectTitle', () => {
   describe('validate', () => {
@@ -6,9 +7,9 @@ describe('ProjectTitle', () => {
       expect(ProjectTitle.validate('新曲のデモ')).toBe('新曲のデモ');
     });
 
-    it('200文字ちょうどは許可', () => {
-      const twoHundredChars = 'あ'.repeat(200);
-      expect(ProjectTitle.validate(twoHundredChars)).toBe(twoHundredChars);
+    it('最大文字数ちょうどは許可', () => {
+      const maxChars = 'あ'.repeat(MAX_PROJECT_TITLE_LENGTH);
+      expect(ProjectTitle.validate(maxChars)).toBe(maxChars);
     });
 
     it('空文字はエラー', () => {
@@ -19,9 +20,9 @@ describe('ProjectTitle', () => {
       expect(() => ProjectTitle.validate('   ')).toThrow();
     });
 
-    it('201文字はエラー', () => {
-      const twoHundredOneChars = 'あ'.repeat(201);
-      expect(() => ProjectTitle.validate(twoHundredOneChars)).toThrow();
+    it('最大文字数+1はエラー', () => {
+      const tooLong = 'あ'.repeat(MAX_PROJECT_TITLE_LENGTH + 1);
+      expect(() => ProjectTitle.validate(tooLong)).toThrow();
     });
   });
 });

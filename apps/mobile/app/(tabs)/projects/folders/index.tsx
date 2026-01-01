@@ -104,8 +104,8 @@ export default function FoldersEditScreen() {
         <DraggableFlatList
           data={folders}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          onDragEnd={({ data }) => handleReorder(data)}
+          keyExtractor={(item: FolderWithCount) => item.id}
+          onDragEnd={({ data }: { data: FolderWithCount[] }) => handleReorder(data)}
           containerStyle={{ flex: 1 }}
           contentContainerStyle={{ flexGrow: 1 }}
           ListHeaderComponent={null}

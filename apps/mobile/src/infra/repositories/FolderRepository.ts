@@ -40,7 +40,7 @@ export class FolderRepository implements IFolderRepository {
   async save(folder: Folder): Promise<void> {
     const userId = await getCurrentUserId();
 
-    // orderIndex が 0 の場合は新規作成として PostgreSQL 関数を使用
+    // 新規作成の場合は PostgreSQL 関数を使用（orderIndex の自動採番）
     if (folder.orderIndex === 0) {
       const { error } = await supabase.rpc('create_folder', {
         p_user_id: userId,
@@ -53,7 +53,7 @@ export class FolderRepository implements IFolderRepository {
       return;
     }
 
-    // orderIndex が 0 以外の場合は既存フォルダの更新
+    // 既存フォルダの更新
     const payload = {
       id: folder.id as string,
       user_id: userId,

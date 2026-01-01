@@ -1,4 +1,5 @@
 import { FolderName } from '../../../../src/domain/folder/vo/FolderName';
+import { MAX_FOLDER_NAME_LENGTH } from '../../../../src/constants/validation';
 
 describe('FolderName', () => {
   describe('validate', () => {
@@ -6,9 +7,9 @@ describe('FolderName', () => {
       expect(FolderName.validate('2024年制作')).toBe('2024年制作');
     });
 
-    it('100文字ちょうどは許可', () => {
-      const hundredChars = 'あ'.repeat(100);
-      expect(FolderName.validate(hundredChars)).toBe(hundredChars);
+    it('最大文字数ちょうどは許可', () => {
+      const maxChars = 'あ'.repeat(MAX_FOLDER_NAME_LENGTH);
+      expect(FolderName.validate(maxChars)).toBe(maxChars);
     });
 
     it('空文字はエラー', () => {
@@ -19,9 +20,9 @@ describe('FolderName', () => {
       expect(() => FolderName.validate('   ')).toThrow();
     });
 
-    it('101文字はエラー', () => {
-      const hundredOneChars = 'あ'.repeat(101);
-      expect(() => FolderName.validate(hundredOneChars)).toThrow();
+    it('最大文字数+1はエラー', () => {
+      const tooLong = 'あ'.repeat(MAX_FOLDER_NAME_LENGTH + 1);
+      expect(() => FolderName.validate(tooLong)).toThrow();
     });
   });
 });

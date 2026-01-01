@@ -1,4 +1,5 @@
 import { TagName } from '../../../../src/domain/tag/vo/TagName';
+import { MAX_TAG_NAME_LENGTH } from '../../../../src/constants/validation';
 
 describe('TagName', () => {
   describe('validate', () => {
@@ -6,9 +7,9 @@ describe('TagName', () => {
       expect(TagName.validate('ラップ')).toBe('ラップ');
     });
 
-    it('30文字ちょうどは許可', () => {
-      const thirtyChars = 'あ'.repeat(30);
-      expect(TagName.validate(thirtyChars)).toBe(thirtyChars);
+    it('最大文字数ちょうどは許可', () => {
+      const maxChars = 'あ'.repeat(MAX_TAG_NAME_LENGTH);
+      expect(TagName.validate(maxChars)).toBe(maxChars);
     });
 
     it('空文字はエラー', () => {
@@ -19,9 +20,9 @@ describe('TagName', () => {
       expect(() => TagName.validate('   ')).toThrow();
     });
 
-    it('31文字はエラー', () => {
-      const thirtyOneChars = 'あ'.repeat(31);
-      expect(() => TagName.validate(thirtyOneChars)).toThrow();
+    it('最大文字数+1はエラー', () => {
+      const tooLong = 'あ'.repeat(MAX_TAG_NAME_LENGTH + 1);
+      expect(() => TagName.validate(tooLong)).toThrow();
     });
   });
 });

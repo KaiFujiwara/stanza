@@ -2,10 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MAX_FOLDERS_PER_USER } from '@lyrics-notes/core';
 import { getFoldersWithCount, FolderWithCount } from '@/infra/query/folder';
 import { Alert } from 'react-native';
-import { createFolderUseCase } from '@/application/usecases/folder/CreateFolderUseCase';
-import { updateFolderNameUseCase } from '@/application/usecases/folder/UpdateFolderNameUseCase';
-import { deleteFolderUseCase } from '@/application/usecases/folder/DeleteFolderUseCase';
-import { reorderFoldersUseCase } from '@/application/usecases/folder/ReorderFoldersUseCase';
+import {
+  createFolderUseCase,
+  updateFolderUseCase,
+  deleteFolderUseCase,
+  reorderFoldersUseCase,
+} from '@/application/usecases';
 
 // Query Keys
 export const folderKeys = {
@@ -63,7 +65,7 @@ export function useUpdateFolderName() {
 
   return useMutation({
     mutationFn: async (params: { id: string; name: string }) => {
-      await updateFolderNameUseCase.execute(params);
+      await updateFolderUseCase.execute(params);
     },
     onSuccess: () => {
       // フォルダ一覧を無効化して再取得

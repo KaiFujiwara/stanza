@@ -3,10 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MAX_PHRASES_PER_USER } from '@lyrics-notes/core';
 import { getPhrases } from '@/infra/query/phrase';
 import { Alert } from 'react-native';
-
-import { createPhraseUseCase } from '@/application/usecases/phrase/CreatePhraseUseCase';
-import { updatePhraseUseCase } from '@/application/usecases/phrase/UpdatePhraseUseCase';
-import { deletePhraseUseCase } from '@/application/usecases/phrase/DeletePhraseUseCase';
+import {
+  createPhraseUseCase,
+  updatePhraseUseCase,
+  deletePhraseUseCase,
+} from '@/application/usecases';
 export const phraseKeys = {
   all: ['phrases'] as const,
   lists: () => [...phraseKeys.all, 'list'] as const,

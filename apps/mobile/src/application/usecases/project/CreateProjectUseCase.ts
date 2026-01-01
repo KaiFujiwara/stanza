@@ -4,9 +4,9 @@ import {
   EntityId,
   DomainError,
   ErrorCode,
+  ProjectRepository,
+  GenreRepository,
 } from '@lyrics-notes/core';
-import { projectRepository } from '@/infra/repositories/ProjectRepository';
-import { genreRepository } from '@/infra/repositories/GenreRepository';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreateProjectInput = {
@@ -21,6 +21,11 @@ export type CreateProjectOutput = {
 };
 
 export class CreateProjectUseCase {
+  constructor(
+    private readonly projectRepository: ProjectRepository,
+    private readonly genreRepository: GenreRepository
+  ) {}
+
   async execute(input: CreateProjectInput): Promise<CreateProjectOutput> {
     try {
       if (!input.title.trim()) {
@@ -34,7 +39,7 @@ export class CreateProjectUseCase {
 
       // ジャンルが指定されている場合、ジャンルの存在確認
       if (genreId) {
-        const genre = await genreRepository.findById(genreId);
+        const genre = await this.genreRepository.findById(genreId);
         if (!genre) {
           throw new DomainError(ErrorCode.ENTITY_NOT_FOUND, 'Genre not found', {
             entity: 'genre',
@@ -51,19 +56,16 @@ export class CreateProjectUseCase {
         Section.create(projectId, sectionInput.name, index)
       );
 
-      // Projectエンティティを作成（orderIndex=0で新規作成を示す）
-      const project = Project.reconstruct(
-        projectId,
+      // Projectエンティティを作成
+      const project = Project.create(
         input.title.trim(),
         folderId,
         genreId,
         0, // PostgreSQL関数がorder_indexを自動採番
-        sections,
-        false,
-        null
+        sections
       );
 
-      await projectRepository.save(project);
+      await this.projectRepository.save(project);
 
       return { project };
     } catch (error) {
@@ -77,5 +79,3 @@ export class CreateProjectUseCase {
     }
   }
 }
-
-export const createProjectUseCase = new CreateProjectUseCase();

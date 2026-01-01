@@ -1,5 +1,4 @@
-import { EntityId, DomainError, ErrorCode } from '@lyrics-notes/core';
-import { tagRepository } from '@/infra/repositories/TagRepository';
+import { EntityId, DomainError, ErrorCode, TagRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type UpdateTagInput = {
@@ -11,9 +10,11 @@ export type UpdateTagInput = {
 export type UpdateTagOutput = void;
 
 export class UpdateTagUseCase {
+  constructor(private readonly tagRepository: TagRepository) {}
+
   async execute(input: UpdateTagInput): Promise<UpdateTagOutput> {
     try {
-      const tag = await tagRepository.findById(EntityId.from(input.id));
+      const tag = await this.tagRepository.findById(EntityId.from(input.id));
       if (!tag) {
         throw new DomainError(ErrorCode.ENTITY_NOT_FOUND, 'Tag not found', { entity: 'tag', tagId: input.id });
       }
@@ -25,7 +26,7 @@ export class UpdateTagUseCase {
         tag.updateColor(input.color);
       }
 
-      await tagRepository.save(tag);
+      await this.tagRepository.save(tag);
     } catch (error) {
       const { userMessage, devMessage, stack, details } = toUserMessage(error);
       console.error('[UpdateTagUseCase] Error:', { devMessage, stack, details });
@@ -33,5 +34,3 @@ export class UpdateTagUseCase {
     }
   }
 }
-
-export const updateTagUseCase = new UpdateTagUseCase();

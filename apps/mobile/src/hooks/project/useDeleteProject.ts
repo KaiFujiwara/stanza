@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteProjectUseCase } from '@/application/usecases/project/DeleteProjectUseCase';
+import { deleteProjectUseCase } from '@/application/usecases';
 import { projectKeys } from './useProjectDetail';
 
 export function useDeleteProject() {

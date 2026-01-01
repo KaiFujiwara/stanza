@@ -74,7 +74,7 @@ export class ProjectRepository implements ProjectRepositoryPort {
       content: section.content as string,
     }));
 
-    // orderIndex が 0 の場合は新規作成として PostgreSQL 関数を使用
+    // orderIndex が 0 の場合は新規作成として PostgreSQL 関数を使用（orderIndex の自動採番）
     if (project.orderIndex === 0) {
       const { error } = await supabase.rpc('create_project_with_sections', {
         p_project_id: project.id as string,
@@ -164,6 +164,34 @@ export class ProjectRepository implements ProjectRepositoryPort {
     if (error) {
       throw new Error('Failed to delete project', { cause: error });
     }
+  }
+
+  async countByFolder(folderId?: EntityId): Promise<number> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      throw new Error('User not authenticated');
+    }
+
+    let query = supabase
+      .from(this.tableName)
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.user.id)
+      .eq('is_deleted', false);
+
+    // フォルダIDでフィルタリング
+    if (folderId) {
+      query = query.eq('folder_id', folderId as string);
+    } else {
+      query = query.is('folder_id', null);
+    }
+
+    const { count, error } = await query;
+
+    if (error) {
+      throw new Error('Failed to count projects', { cause: error });
+    }
+
+    return count ?? 0;
   }
 }
 

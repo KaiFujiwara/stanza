@@ -1,5 +1,4 @@
-import { EntityId, DomainError, ErrorCode } from '@lyrics-notes/core';
-import { phraseRepository } from '@/infra/repositories/PhraseRepository';
+import { EntityId, DomainError, ErrorCode, PhraseRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type UpdatePhraseInput = {
@@ -12,9 +11,11 @@ export type UpdatePhraseInput = {
 export type UpdatePhraseOutput = void;
 
 export class UpdatePhraseUseCase {
+  constructor(private readonly phraseRepository: PhraseRepository) {}
+
   async execute(input: UpdatePhraseInput): Promise<UpdatePhraseOutput> {
     try {
-      const existing = await phraseRepository.findById(EntityId.from(input.id));
+      const existing = await this.phraseRepository.findById(EntityId.from(input.id));
       if (!existing) {
         throw new DomainError(ErrorCode.ENTITY_NOT_FOUND, 'Phrase not found', { entity: 'phrase', phraseId: input.id });
       }
@@ -29,7 +30,7 @@ export class UpdatePhraseUseCase {
         existing.setTags(input.tagIds);
       }
 
-      await phraseRepository.save(existing);
+      await this.phraseRepository.save(existing);
     } catch (error) {
       const { userMessage, devMessage, stack, details } = toUserMessage(error);
       console.error('[UpdatePhraseUseCase] Error:', { devMessage, stack, details });
@@ -37,5 +38,3 @@ export class UpdatePhraseUseCase {
     }
   }
 }
-
-export const updatePhraseUseCase = new UpdatePhraseUseCase();

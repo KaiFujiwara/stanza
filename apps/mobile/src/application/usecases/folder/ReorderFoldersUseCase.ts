@@ -1,5 +1,4 @@
-import { EntityId } from '@lyrics-notes/core';
-import { folderRepository } from '@/infra/repositories/FolderRepository';
+import { EntityId, FolderRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type ReorderFoldersInput = {
@@ -9,9 +8,11 @@ export type ReorderFoldersInput = {
 export type ReorderFoldersOutput = void;
 
 export class ReorderFoldersUseCase {
+  constructor(private readonly folderRepository: FolderRepository) {}
+
   async execute(input: ReorderFoldersInput): Promise<ReorderFoldersOutput> {
     try {
-      await folderRepository.reorder(input.folderIds.map(id => EntityId.from(id)));
+      await this.folderRepository.reorder(input.folderIds.map(id => EntityId.from(id)));
     } catch (error) {
       const { userMessage, devMessage, stack, details } = toUserMessage(error);
       console.error('[ReorderFoldersUseCase] Error:', { devMessage, stack, details });
@@ -19,5 +20,3 @@ export class ReorderFoldersUseCase {
     }
   }
 }
-
-export const reorderFoldersUseCase = new ReorderFoldersUseCase();

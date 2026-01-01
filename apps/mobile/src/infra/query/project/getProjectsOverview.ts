@@ -42,7 +42,8 @@ export async function getProjectsOverview(): Promise<ProjectsOverview> {
       genres:genre_id (name)
     `)
     .eq('user_id', userId)
-    .eq('is_deleted', false);
+    .eq('is_deleted', false)
+    .order('order_index', { ascending: true });
 
   if (projectsError) {
     throw new Error(`プロジェクトの取得に失敗しました: ${projectsError.message}`);

@@ -1,5 +1,4 @@
-import { EntityId, DomainError, ErrorCode } from '@lyrics-notes/core';
-import { genreRepository } from '@/infra/repositories/GenreRepository';
+import { EntityId, DomainError, ErrorCode, GenreRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type UpdateGenreInput = {
@@ -12,9 +11,11 @@ export type UpdateGenreInput = {
 export type UpdateGenreOutput = void;
 
 export class UpdateGenreUseCase {
+  constructor(private readonly genreRepository: GenreRepository) {}
+
   async execute(input: UpdateGenreInput): Promise<UpdateGenreOutput> {
     try {
-      const genre = await genreRepository.findById(EntityId.from(input.id));
+      const genre = await this.genreRepository.findById(EntityId.from(input.id));
       if (!genre) {
         throw new DomainError(
           ErrorCode.ENTITY_NOT_FOUND,
@@ -33,7 +34,7 @@ export class UpdateGenreUseCase {
         genre.setSectionNames(input.sectionNames);
       }
 
-      await genreRepository.save(genre);
+      await this.genreRepository.save(genre);
     } catch (error) {
       const { userMessage, devMessage, stack, details } = toUserMessage(error);
       console.error('[UpdateGenreUseCase] Error:', { devMessage, stack, details });
@@ -41,5 +42,3 @@ export class UpdateGenreUseCase {
     }
   }
 }
-
-export const updateGenreUseCase = new UpdateGenreUseCase();

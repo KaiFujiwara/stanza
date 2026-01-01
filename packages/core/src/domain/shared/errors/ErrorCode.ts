@@ -6,6 +6,7 @@ export const ErrorCode = {
   // バリデーションエラー
   EMPTY_VALUE: 'EMPTY_VALUE',
   MAX_LENGTH_EXCEEDED: 'MAX_LENGTH_EXCEEDED',
+  INVALID_FORMAT: 'INVALID_FORMAT',
 
   // ビジネスルール違反
   DUPLICATE_NAME: 'DUPLICATE_NAME',

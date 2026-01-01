@@ -2,8 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getPhraseDetail } from '@/infra/query/phrase';
 import { phraseKeys } from './usePhrases';
 import { Alert } from 'react-native';
-import { updatePhraseUseCase } from '@/application/usecases/phrase/UpdatePhraseUseCase';
-import { deletePhraseUseCase } from '@/application/usecases/phrase/DeletePhraseUseCase';
+import {
+  updatePhraseUseCase,
+  deletePhraseUseCase,
+} from '@/application/usecases';
 
 /**
  * フレーズ詳細取得用フック

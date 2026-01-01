@@ -2,9 +2,11 @@ import { getTagDetail, getTags } from '@/infra/query/tag';
 import { MAX_TAGS_PER_USER } from '@lyrics-notes/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
-import { createTagUseCase } from '@/application/usecases/tag/CreateTagUseCase';
-import { updateTagUseCase } from '@/application/usecases/tag/UpdateTagUseCase';
-import { deleteTagUseCase } from '@/application/usecases/tag/DeleteTagUseCase';
+import {
+  createTagUseCase,
+  updateTagUseCase,
+  deleteTagUseCase,
+} from '@/application/usecases';
 
 export const tagKeys = {
   all: ['tags'] as const,

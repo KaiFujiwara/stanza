@@ -22,6 +22,10 @@ export const ERROR_MESSAGES: Record<ErrorCode, ErrorMessage> = {
     user: '入力内容が長すぎます。文字数を減らして再度お試しください。',
     dev: 'Validation failed: max length exceeded',
   },
+  [ErrorCode.INVALID_FORMAT]: {
+    user: '入力形式が正しくありません。正しい形式で入力してください。',
+    dev: 'Validation failed: invalid format',
+  },
   [ErrorCode.DUPLICATE_NAME]: {
     user: 'その名前は既に使用されています。別の名前で再度お試しください。',
     dev: 'Business rule violation: duplicate name',

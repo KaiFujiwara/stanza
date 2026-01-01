@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateProjectUseCase } from '@/application/usecases/project/UpdateProjectUseCase';
+import { updateProjectUseCase } from '@/application/usecases';
 import { SectionItem } from '@/components/shared/SectionManager';
 import { projectKeys } from './useProjectDetail';
 

@@ -1,5 +1,4 @@
-import { Folder } from '@lyrics-notes/core';
-import { folderRepository } from '@/infra/repositories/FolderRepository';
+import { Folder, FolderRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreateFolderInput = {
@@ -11,11 +10,13 @@ export type CreateFolderOutput = {
 };
 
 export class CreateFolderUseCase {
+  constructor(private readonly folderRepository: FolderRepository) {}
+
   async execute(input: CreateFolderInput): Promise<CreateFolderOutput> {
     try {
       // orderIndex=0 でエンティティを作成すると、save メソッド内で PostgreSQL 関数が呼ばれる
       const folder = Folder.create(input.name);
-      await folderRepository.save(folder);
+      await this.folderRepository.save(folder);
 
       return { folder };
     } catch (error) {
@@ -25,5 +26,3 @@ export class CreateFolderUseCase {
     }
   }
 }
-
-export const createFolderUseCase = new CreateFolderUseCase();

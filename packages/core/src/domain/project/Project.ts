@@ -126,6 +126,11 @@ export class Project {
     this._folderId = folderId;
   }
 
+  setOrderIndex(orderIndex: number): void {
+    this.ensureNotDeleted();
+    this._orderIndex = orderIndex;
+  }
+
   setGenre(genreId?: EntityId): void {
     this.ensureNotDeleted();
     this._genreId = genreId;

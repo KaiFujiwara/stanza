@@ -4,9 +4,9 @@ import {
   EntityId,
   DomainError,
   ErrorCode,
+  ProjectRepository,
+  GenreRepository,
 } from '@lyrics-notes/core';
-import { projectRepository } from '@/infra/repositories/ProjectRepository';
-import { genreRepository } from '@/infra/repositories/GenreRepository';
 import { toUserMessage } from '@/lib/errors';
 
 export type UpdateProjectInput = {
@@ -22,10 +22,15 @@ export type UpdateProjectOutput = {
 };
 
 export class UpdateProjectUseCase {
+  constructor(
+    private readonly projectRepository: ProjectRepository,
+    private readonly genreRepository: GenreRepository,
+  ) {}
+
   async execute(input: UpdateProjectInput): Promise<UpdateProjectOutput> {
     try {
       const projectId = EntityId.from(input.id);
-      const project = await projectRepository.findById(projectId);
+      const project = await this.projectRepository.findById(projectId);
 
       if (!project) {
         throw new DomainError(ErrorCode.ENTITY_NOT_FOUND, 'Project not found', {
@@ -46,8 +51,22 @@ export class UpdateProjectUseCase {
 
       // フォルダ移動
       if (input.folderId !== undefined) {
-        const folderId = input.folderId ? EntityId.from(input.folderId) : undefined;
-        project.moveToFolder(folderId);
+        const newFolderId = input.folderId ? EntityId.from(input.folderId) : undefined;
+
+        // フォルダが変更された場合、移動先フォルダの orderIndex を再計算
+        const currentFolderId = project.folderId;
+        const folderChanged =
+          (currentFolderId === undefined && newFolderId !== undefined) ||
+          (currentFolderId !== undefined && newFolderId === undefined) ||
+          (currentFolderId && newFolderId && currentFolderId !== newFolderId);
+
+        if (folderChanged) {
+          // 移動先フォルダのプロジェクト数を取得して、次の orderIndex を計算
+          const count = await this.projectRepository.countByFolder(newFolderId);
+          project.setOrderIndex(count + 1);
+        }
+
+        project.moveToFolder(newFolderId);
       }
 
       // ジャンル設定（nullまたは文字列が指定された場合のみ更新）
@@ -56,7 +75,7 @@ export class UpdateProjectUseCase {
 
         // ジャンルが指定されている場合、ジャンルの存在確認
         if (genreId) {
-          const genre = await genreRepository.findById(genreId);
+          const genre = await this.genreRepository.findById(genreId);
           if (!genre) {
             throw new DomainError(ErrorCode.ENTITY_NOT_FOUND, 'Genre not found', {
               entity: 'genre',
@@ -93,7 +112,7 @@ export class UpdateProjectUseCase {
         project.setSections(sections);
       }
 
-      await projectRepository.save(project);
+      await this.projectRepository.save(project);
 
       return { project };
     } catch (error) {
@@ -107,5 +126,3 @@ export class UpdateProjectUseCase {
     }
   }
 }
-
-export const updateProjectUseCase = new UpdateProjectUseCase();

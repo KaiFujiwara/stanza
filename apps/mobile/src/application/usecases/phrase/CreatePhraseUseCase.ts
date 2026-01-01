@@ -1,5 +1,4 @@
-import { Phrase, MAX_PHRASES_PER_USER, DomainError, ErrorCode } from '@lyrics-notes/core';
-import { phraseRepository } from '@/infra/repositories/PhraseRepository';
+import { Phrase, MAX_PHRASES_PER_USER, DomainError, ErrorCode, PhraseRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreatePhraseInput = {
@@ -13,10 +12,12 @@ export type CreatePhraseOutput = {
 };
 
 export class CreatePhraseUseCase {
+  constructor(private readonly phraseRepository: PhraseRepository) {}
+
   async execute(input: CreatePhraseInput): Promise<CreatePhraseOutput> {
     try {
       // 作成上限チェック
-      const currentCount = await phraseRepository.countByUser();
+      const currentCount = await this.phraseRepository.countByUser();
       if (currentCount >= MAX_PHRASES_PER_USER) {
         throw new DomainError(
           ErrorCode.MAX_COUNT_EXCEEDED,
@@ -29,7 +30,7 @@ export class CreatePhraseUseCase {
         note: input.note,
         tagIds: input.tagIds,
       });
-      await phraseRepository.save(phrase);
+      await this.phraseRepository.save(phrase);
 
       return { phrase };
     } catch (error) {
@@ -39,5 +40,3 @@ export class CreatePhraseUseCase {
     }
   }
 }
-
-export const createPhraseUseCase = new CreatePhraseUseCase();

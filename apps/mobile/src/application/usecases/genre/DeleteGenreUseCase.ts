@@ -1,5 +1,4 @@
-import { EntityId } from '@lyrics-notes/core';
-import { genreRepository } from '@/infra/repositories/GenreRepository';
+import { EntityId, GenreRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type DeleteGenreInput = {
@@ -9,9 +8,11 @@ export type DeleteGenreInput = {
 export type DeleteGenreOutput = void;
 
 export class DeleteGenreUseCase {
+  constructor(private readonly genreRepository: GenreRepository) {}
+
   async execute(input: DeleteGenreInput): Promise<DeleteGenreOutput> {
     try {
-      await genreRepository.delete(EntityId.from(input.id));
+      await this.genreRepository.delete(EntityId.from(input.id));
     } catch (error) {
       const { userMessage, devMessage, stack, details } = toUserMessage(error);
       console.error('[DeleteGenreUseCase] Error:', { devMessage, stack, details });
@@ -19,5 +20,3 @@ export class DeleteGenreUseCase {
     }
   }
 }
-
-export const deleteGenreUseCase = new DeleteGenreUseCase();

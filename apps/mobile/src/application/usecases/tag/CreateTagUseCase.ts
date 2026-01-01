@@ -1,5 +1,4 @@
-import { Tag, MAX_TAGS_PER_USER, TagDomainService, TagName, DomainError, ErrorCode } from '@lyrics-notes/core';
-import { tagRepository } from '@/infra/repositories/TagRepository';
+import { Tag, MAX_TAGS_PER_USER, TagDomainService, TagName, DomainError, ErrorCode, TagRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreateTagInput = {
@@ -12,10 +11,12 @@ export type CreateTagOutput = {
 };
 
 export class CreateTagUseCase {
+  constructor(private readonly tagRepository: TagRepository) {}
+
   async execute(input: CreateTagInput): Promise<CreateTagOutput> {
     try {
       // 作成上限チェック
-      const currentCount = await tagRepository.countByUser();
+      const currentCount = await this.tagRepository.countByUser();
       if (currentCount >= MAX_TAGS_PER_USER) {
         throw new DomainError(
           ErrorCode.MAX_COUNT_EXCEEDED,
@@ -27,11 +28,11 @@ export class CreateTagUseCase {
       const validatedName = TagName.validate(input.name);
 
       // タグ名の重複チェック
-      const exists = await tagRepository.existsByName(validatedName);
+      const exists = await this.tagRepository.existsByName(validatedName);
       TagDomainService.ensureUniqueTagName(validatedName, exists);
 
       const tag = Tag.create(input.name, input.color);
-      await tagRepository.save(tag);
+      await this.tagRepository.save(tag);
 
       return { tag };
     } catch (error) {
@@ -41,5 +42,3 @@ export class CreateTagUseCase {
     }
   }
 }
-
-export const createTagUseCase = new CreateTagUseCase();

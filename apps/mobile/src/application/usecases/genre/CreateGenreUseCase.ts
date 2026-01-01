@@ -1,5 +1,4 @@
-import { Genre, MAX_GENRES_PER_USER, DomainError, ErrorCode } from '@lyrics-notes/core';
-import { genreRepository } from '@/infra/repositories/GenreRepository';
+import { Genre, MAX_GENRES_PER_USER, DomainError, ErrorCode, GenreRepository } from '@lyrics-notes/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreateGenreInput = {
@@ -13,10 +12,12 @@ export type CreateGenreOutput = {
 };
 
 export class CreateGenreUseCase {
+  constructor(private readonly genreRepository: GenreRepository) {}
+
   async execute(input: CreateGenreInput): Promise<CreateGenreOutput> {
     try {
       // 作成上限チェック
-      const currentCount = await genreRepository.countByUser();
+      const currentCount = await this.genreRepository.countByUser();
       if (currentCount >= MAX_GENRES_PER_USER) {
         throw new DomainError(
           ErrorCode.MAX_COUNT_EXCEEDED,
@@ -30,7 +31,7 @@ export class CreateGenreUseCase {
         sectionNames: input.sectionNames || [],
       });
 
-      await genreRepository.save(genre);
+      await this.genreRepository.save(genre);
 
       return { genre };
     } catch (error) {
@@ -40,5 +41,3 @@ export class CreateGenreUseCase {
     }
   }
 }
-
-export const createGenreUseCase = new CreateGenreUseCase();
