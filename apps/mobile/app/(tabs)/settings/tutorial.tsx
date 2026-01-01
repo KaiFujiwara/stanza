@@ -1,4 +1,4 @@
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { MaterialIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";

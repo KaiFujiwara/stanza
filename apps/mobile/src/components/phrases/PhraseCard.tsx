@@ -1,6 +1,7 @@
 import { PhraseListItem } from '@/infra/query/phrase';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { DEFAULT_TAG_COLOR } from '@/constants/tagColors';
 
 interface PhraseCardProps {
@@ -12,6 +13,11 @@ export function PhraseCard({ item, onPress }: PhraseCardProps) {
   // タグを最大10個まで表示
   const displayTags = item.tags.slice(0, 10);
   const hasMoreTags = item.tags.length > 10;
+
+  const handleCopy = async () => {
+    await Clipboard.setStringAsync(item.text);
+    Alert.alert('コピーしました', 'フレーズをクリップボードにコピーしました');
+  };
 
   return (
     <TouchableOpacity
@@ -49,18 +55,27 @@ export function PhraseCard({ item, onPress }: PhraseCardProps) {
         </View>
       )}
 
-      {/* 更新日時 */}
-      <View className="flex-row items-center">
-        <MaterialIcons name="update" size={14} color="#9CA3AF" />
-        <Text className="text-xs text-gray-400 ml-1">
-          最終更新: {new Date(item.updatedAt).toLocaleDateString('ja-JP', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </Text>
+      {/* 更新日時とコピーボタン */}
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center flex-1">
+          <MaterialIcons name="update" size={14} color="#9CA3AF" />
+          <Text className="text-xs text-gray-400 ml-1">
+            最終更新: {new Date(item.updatedAt).toLocaleDateString('ja-JP', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={handleCopy}
+          className="p-2 bg-gray-100 rounded-lg"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <MaterialIcons name="content-copy" size={18} color="#6B7280" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );

@@ -61,8 +61,8 @@ BEGIN
     -- プロジェクトを未分類に移動
     UPDATE projects
     SET folder_id = NULL,
-        order_index = v_new_order_index,
-        updated_at = NOW()
+        order_index = v_new_order_index
+        -- updated_at はBEFORE UPDATEトリガーで自動更新
     WHERE id = v_project.id;
   END LOOP;
 
@@ -74,8 +74,8 @@ BEGIN
   -- 5. 残りのフォルダのorder_indexを再採番
   -- 削除したフォルダより後ろのフォルダを1つずつ前に詰める
   UPDATE folders
-  SET order_index = order_index - 1,
-      updated_at = NOW()
+  SET order_index = order_index - 1
+      -- updated_at はBEFORE UPDATEトリガーで自動更新
   WHERE user_id = p_user_id
     AND order_index > v_deleted_order_index;
 
@@ -126,8 +126,9 @@ BEGIN
   ON CONFLICT (id) DO UPDATE
   SET
     text = EXCLUDED.text,
-    note = EXCLUDED.note,
-    updated_at = NOW();
+    note = EXCLUDED.note;
+    -- created_at は更新しないので既存の値が保持される
+    -- updated_at はBEFORE UPDATEトリガーで自動更新
 
   -- 既存のタグ関連を削除
   DELETE FROM phrase_tags

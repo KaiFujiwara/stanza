@@ -43,10 +43,6 @@ export class CreateProjectUseCase {
         }
       }
 
-      // 最大順序インデックスを取得
-      const maxOrderIndex = await projectRepository.getMaxOrderIndex(folderId);
-      const orderIndex = maxOrderIndex + 1;
-
       // 新しいプロジェクトのIDを生成（Sectionで必要）
       const projectId = EntityId.generate();
 
@@ -55,13 +51,13 @@ export class CreateProjectUseCase {
         Section.create(projectId, sectionInput.name, index)
       );
 
-      // Projectエンティティを作成（既に生成したIDを使用）
+      // Projectエンティティを作成（orderIndex=0で新規作成を示す）
       const project = Project.reconstruct(
         projectId,
         input.title.trim(),
         folderId,
         genreId,
-        orderIndex,
+        0, // PostgreSQL関数がorder_indexを自動採番
         sections,
         false,
         null

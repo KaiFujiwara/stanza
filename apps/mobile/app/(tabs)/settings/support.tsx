@@ -1,10 +1,10 @@
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { MaterialIcons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Constants from "expo-constants";
 
 export default function SupportScreen() {
   const router = useRouter();

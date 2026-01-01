@@ -1,4 +1,4 @@
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

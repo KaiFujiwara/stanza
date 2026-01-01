@@ -1,6 +1,6 @@
-import { Folder, FolderRepository as IFolderRepository, EntityId } from '@lyrics-notes/core';
-import { supabase } from '@/lib/supabase/client';
 import { getCurrentUserId } from '@/lib/supabase/auth';
+import { supabase } from '@/lib/supabase/client';
+import { EntityId, Folder, FolderRepository as IFolderRepository } from '@lyrics-notes/core';
 
 type FolderRow = {
   id: string;
@@ -54,23 +54,11 @@ export class FolderRepository implements IFolderRepository {
     }
 
     // orderIndex が 0 以外の場合は既存フォルダの更新
-    const now = new Date().toISOString();
-
-    // 既存のフォルダかチェック
-    const { data: existing } = await supabase
-      .from('folders')
-      .select('created_at')
-      .eq('id', folder.id as string)
-      .eq('user_id', userId)
-      .single();
-
     const payload = {
       id: folder.id as string,
       user_id: userId,
       name: folder.name,
       order_index: folder.orderIndex,
-      created_at: existing?.created_at || now,
-      updated_at: now,
     };
 
     const { error } = await supabase
@@ -84,7 +72,6 @@ export class FolderRepository implements IFolderRepository {
 
   async reorder(folderIds: EntityId[]): Promise<void> {
     const userId = await getCurrentUserId();
-    const now = new Date().toISOString();
 
     // Supabaseではバッチ更新の代わりに個別に更新
     const updates = folderIds.map((folderId, index) =>
@@ -92,7 +79,6 @@ export class FolderRepository implements IFolderRepository {
         .from('folders')
         .update({
           order_index: index + 1, // 1から開始
-          updated_at: now
         })
         .eq('id', folderId as string)
         .eq('user_id', userId)

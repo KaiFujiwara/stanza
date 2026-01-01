@@ -1,23 +1,28 @@
-import { ProjectTitle } from './vo/ProjectTitle';
+import { ProjectTitle, ProjectTitleValue } from './vo/ProjectTitle';
 import { EntityId } from '../shared/EntityId';
+import { Section } from './Section';
+import { MAX_SECTIONS_PER_PROJECT } from '../../constants/limits';
+import { DomainError } from '../shared/errors/DomainError';
+import { ErrorCode } from '../shared/errors/ErrorCode';
 
 export class Project {
+
   private _id: EntityId;
-  private _title: string;
-  private _folderId?: string;
-  private _genreId?: string;
+  private _title: ProjectTitleValue;
+  private _folderId?: EntityId;
+  private _genreId?: EntityId;
+  private _orderIndex: number;
+  private _sections: Section[];
   private _isDeleted: boolean;
   private _deletedAt: Date | null;
-  private _createdAt: Date;
-  private _updatedAt: Date;
 
   private constructor(
     id: EntityId,
     title: string,
-    folderId: string | undefined,
-    genreId: string | undefined,
-    createdAt: Date = new Date(),
-    updatedAt: Date = new Date(),
+    folderId: EntityId | undefined,
+    genreId: EntityId | undefined,
+    orderIndex: number,
+    sections: Section[],
     isDeleted: boolean = false,
     deletedAt: Date | null = null
   ) {
@@ -25,26 +30,34 @@ export class Project {
     this._title = ProjectTitle.validate(title);
     this._folderId = folderId;
     this._genreId = genreId;
+    this._orderIndex = orderIndex;
+    this._sections = sections;
     this._isDeleted = isDeleted;
     this._deletedAt = deletedAt;
-    this._createdAt = createdAt;
-    this._updatedAt = updatedAt;
   }
 
   get id(): EntityId {
     return this._id;
   }
 
-  get title(): string {
+  get title(): ProjectTitleValue {
     return this._title;
   }
 
-  get folderId(): string | undefined {
+  get folderId(): EntityId | undefined {
     return this._folderId;
   }
 
-  get genreId(): string | undefined {
+  get genreId(): EntityId | undefined {
     return this._genreId;
+  }
+
+  get orderIndex(): number {
+    return this._orderIndex;
+  }
+
+  get sections(): readonly Section[] {
+    return [...this._sections];
   }
 
   get isDeleted(): boolean {
@@ -55,23 +68,27 @@ export class Project {
     return this._deletedAt;
   }
 
-  get createdAt(): Date {
-    return this._createdAt;
-  }
-
-  get updatedAt(): Date {
-    return this._updatedAt;
-  }
-
-  static create(title: string, folderId?: string, genreId?: string): Project {
-    const now = new Date();
+  static create(
+    title: string,
+    folderId?: EntityId,
+    genreId?: EntityId,
+    orderIndex: number = 0,
+    sections: Section[] = []
+  ): Project {
+    if (sections.length > MAX_SECTIONS_PER_PROJECT) {
+      throw new DomainError(
+        ErrorCode.MAX_COUNT_EXCEEDED,
+        `セクション数の上限を超えています（最大: ${MAX_SECTIONS_PER_PROJECT}）`,
+        { maxCount: MAX_SECTIONS_PER_PROJECT, actualCount: sections.length }
+      );
+    }
     return new Project(
       EntityId.generate(),
       title,
       folderId,
       genreId,
-      now,
-      now,
+      orderIndex,
+      sections,
       false,
       null
     );
@@ -80,10 +97,10 @@ export class Project {
   static reconstruct(
     id: EntityId,
     title: string,
-    folderId: string | undefined,
-    genreId: string | undefined,
-    createdAt: Date,
-    updatedAt: Date,
+    folderId: EntityId | undefined,
+    genreId: EntityId | undefined,
+    orderIndex: number,
+    sections: Section[],
     isDeleted: boolean,
     deletedAt: Date | null
   ): Project {
@@ -92,39 +109,60 @@ export class Project {
       title,
       folderId,
       genreId,
-      createdAt,
-      updatedAt,
+      orderIndex,
+      sections,
       isDeleted,
       deletedAt
     );
   }
 
   updateTitle(title: string): void {
-    const validatedTitle = ProjectTitle.validate(title);
-    this._title = validatedTitle;
-    this._updatedAt = new Date();
+    this.ensureNotDeleted();
+    this._title = ProjectTitle.validate(title);
+  }
+
+  moveToFolder(folderId?: EntityId): void {
+    this.ensureNotDeleted();
+    this._folderId = folderId;
+  }
+
+  setGenre(genreId?: EntityId): void {
+    this.ensureNotDeleted();
+    this._genreId = genreId;
+  }
+
+  setSections(sections: Section[]): void {
+    this.ensureNotDeleted();
+
+    if (sections.length > MAX_SECTIONS_PER_PROJECT) {
+      throw new DomainError(
+        ErrorCode.MAX_COUNT_EXCEEDED,
+        `セクション数の上限を超えています（最大: ${MAX_SECTIONS_PER_PROJECT}）`,
+        { maxCount: MAX_SECTIONS_PER_PROJECT, actualCount: sections.length }
+      );
+    }
+
+    this._sections = sections;
   }
 
   softDelete(): void {
     const now = new Date();
     this._isDeleted = true;
     this._deletedAt = now;
-    this._updatedAt = now;
   }
 
   restore(): void {
     this._isDeleted = false;
     this._deletedAt = null;
-    this._updatedAt = new Date();
   }
 
-  moveToFolder(folderId?: string): void {
-    this._folderId = folderId;
-    this._updatedAt = new Date();
-  }
-
-  setGenre(genreId?: string): void {
-    this._genreId = genreId;
-    this._updatedAt = new Date();
+  private ensureNotDeleted(): void {
+    if (this._isDeleted) {
+      throw new DomainError(
+        ErrorCode.ENTITY_NOT_FOUND,
+        '削除済みのプロジェクトは変更できません',
+        { entity: 'project', id: this._id, isDeleted: true }
+      );
+    }
   }
 }

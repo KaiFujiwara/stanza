@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { View, Text, TouchableOpacity, Alert, RefreshControl } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { FloatingActionButton } from "@/components/shared/FloatingActionButton";
+import { HelpModal } from "@/components/shared/HelpModal";
+import { ItemCountBadge } from "@/components/shared/ItemCountBadge";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
+import { useFolders, useReorderFolders } from "@/hooks/folder";
+import { FolderWithCount } from '@/infra/query/folder';
 import { MaterialIcons } from "@expo/vector-icons";
+import { MAX_FOLDERS_PER_USER } from "@lyrics-notes/core";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, {
   RenderItemParams,
 } from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { HelpModal } from "@/components/HelpModal";
-import { ItemCountBadge } from "@/components/ItemCountBadge";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import { FolderWithCount } from '@/infra/query/folder';
-import { useFolders, useReorderFolders } from "@/hooks/folder";
-import { MAX_FOLDERS_PER_USER } from "@lyrics-notes/core";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function FoldersEditScreen() {
   const router = useRouter();

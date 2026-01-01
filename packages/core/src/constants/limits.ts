@@ -34,7 +34,19 @@ export const MAX_GENRES_PER_USER = 10;
 export const MAX_SECTIONS_PER_GENRE = 20;
 
 /**
+ * プロジェクトの最大作成数
+ * 大量のプロジェクト管理を考慮した制限値
+ */
+export const MAX_PROJECTS_PER_USER = 500;
+
+/**
  * プロジェクト1つあたりのセクション最大数
  * プロジェクト内のセクション数制限
  */
 export const MAX_SECTIONS_PER_PROJECT = 20;
+
+/**
+ * セクションコンテンツの最大文字数
+ * 歌詞セクションの内容（改行を含む）の文字数制限
+ */
+export const MAX_SECTION_CONTENT_LENGTH = 3000;

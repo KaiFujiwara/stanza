@@ -1,16 +1,16 @@
-import { FlatList, View, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { HelpModal } from "@/components/HelpModal";
-import { ItemCountBadge } from "@/components/ItemCountBadge";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { FloatingActionButton } from "@/components/shared/FloatingActionButton";
+import { HelpModal } from "@/components/shared/HelpModal";
+import { ItemCountBadge } from "@/components/shared/ItemCountBadge";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { TagCard } from "@/components/tags/TagCard";
 import { useTags } from "@/hooks/tag";
 import { Tag } from "@/infra/query/tag";
-import { useRouter } from "expo-router";
 import { MAX_TAGS_PER_USER } from "@lyrics-notes/core";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TagsScreen() {
   const router = useRouter();

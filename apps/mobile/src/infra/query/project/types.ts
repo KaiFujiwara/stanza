@@ -37,7 +37,7 @@ export interface ProjectDetail {
     id: string;
     name: string;
     orderIndex: number;
-    lines: string[];
+    content: string;
   }>;
   isDeleted: boolean;
   deletedAt: Date | null;
@@ -67,7 +67,7 @@ export type SectionRow = {
   project_id: string;
   name: string;
   order_index: number;
-  lines: string[];
+  content: string;
 };
 
 export type FolderRow = {

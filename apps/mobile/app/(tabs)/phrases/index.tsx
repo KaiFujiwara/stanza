@@ -1,20 +1,20 @@
-import { EmptyState } from "@/components/EmptyState";
-import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { HelpModal } from "@/components/HelpModal";
-import { ItemCountBadge } from "@/components/ItemCountBadge";
 import { PhraseCard } from "@/components/phrases/PhraseCard";
 import { PhraseSearchBar } from "@/components/phrases/PhraseSearchBar";
 import { PhraseSortSelector, SortOrder } from "@/components/phrases/PhraseSortSelector";
 import { TagFilterModal } from "@/components/phrases/TagFilterModal";
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { FloatingActionButton } from "@/components/shared/FloatingActionButton";
+import { HelpModal } from "@/components/shared/HelpModal";
+import { ItemCountBadge } from "@/components/shared/ItemCountBadge";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { usePhrases } from "@/hooks/phrase";
 import { PhraseListItem } from "@/infra/query/phrase";
 import { MaterialIcons } from "@expo/vector-icons";
+import { MAX_PHRASES_PER_USER } from "@lyrics-notes/core";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MAX_PHRASES_PER_USER } from "@lyrics-notes/core";
 
 export default function PhrasesScreen() {
   const router = useRouter();

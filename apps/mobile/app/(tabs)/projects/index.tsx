@@ -1,19 +1,22 @@
-import { EmptyState } from "@/components/EmptyState";
-import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { HelpModal } from "@/components/HelpModal";
 import { FolderTabList } from "@/components/projects/FolderTabList";
 import { ProjectCard } from "@/components/projects/ProjectCard";
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { FloatingActionButton } from "@/components/shared/FloatingActionButton";
+import { HelpModal } from "@/components/shared/HelpModal";
+import { ItemCountBadge } from "@/components/shared/ItemCountBadge";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { useProjects } from "@/hooks/project";
 import { ProjectListItem } from '@/infra/query/project';
-import { useState } from "react";
-import { FlatList, TouchableOpacity, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { MAX_PROJECTS_PER_USER } from "@lyrics-notes/core";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useState, useEffect } from "react";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProjectsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ selectFolderId?: string }>();
   const {
     loading,
     loadOverview,
@@ -21,9 +24,20 @@ export default function ProjectsScreen() {
     selectedFolderId,
     setSelectedFolderId,
     filteredProjects,
+    canCreate,
+    currentCount,
+    maxCount,
   } = useProjects();
 
   const [helpModalVisible, setHelpModalVisible] = useState(false);
+
+  // パラメータからフォルダIDが渡された場合、そのフォルダを選択
+  useEffect(() => {
+    if (params.selectFolderId !== undefined) {
+      // 空文字列の場合は null (未分類)、それ以外はフォルダID
+      setSelectedFolderId(params.selectFolderId === '' ? null : params.selectFolderId);
+    }
+  }, [params.selectFolderId, setSelectedFolderId]);
 
 
   const renderProject = ({ item }: { item: ProjectListItem }) => (
@@ -91,7 +105,7 @@ export default function ProjectsScreen() {
         visible={helpModalVisible}
         onClose={() => setHelpModalVisible(false)}
         title="歌詞について"
-        content="歌詞プロジェクトは、楽曲ごとに歌詞を管理する機能です。プロジェクトを作成すると、歌詞のバージョン管理や音数カウント、韻チェックなどの機能を利用できます。&#10;&#10;下部の + ボタンから新しいプロジェクトを作成できます。"
+        content={`歌詞プロジェクトは、楽曲ごとに歌詞を管理する機能です。プロジェクトを作成すると、歌詞のバージョン管理や音数カウント、韻チェックなどの機能を利用できます。\n\nフォルダで整理して、ジャンルを設定することでテンプレートからセクションを作成できます。\n\nプロジェクトは最大${MAX_PROJECTS_PER_USER}個まで作成できます。`}
       />
 
       <FloatingActionButton
@@ -99,7 +113,10 @@ export default function ProjectsScreen() {
           pathname: '/projects/new',
           params: { folderId: selectedFolderId || '' }
         })}
+        disabled={!canCreate}
       />
+
+      <ItemCountBadge currentCount={currentCount} maxCount={maxCount} />
     </SafeAreaView>
   );
 }

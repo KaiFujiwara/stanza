@@ -16,14 +16,13 @@ BEGIN
   WHERE user_id = p_user_id;
 
   -- フォルダを挿入
-  INSERT INTO folders (id, user_id, name, order_index, created_at, updated_at)
+  INSERT INTO folders (id, user_id, name, order_index)
   VALUES (
     gen_random_uuid(),
     p_user_id,
     p_name,
-    v_next_order_index,
-    NOW(),
-    NOW()
+    v_next_order_index
+    -- created_at, updated_at はDEFAULT値(NOW())で自動設定
   )
   RETURNING * INTO v_folder;
 

@@ -36,6 +36,7 @@ export * from './phrase/vo/PhraseText';
 // Project
 // ============================================================================
 export * from './project/Project';
+export * from './project/ProjectDomainService';
 export * from './project/ProjectRepository';
 export * from './project/Section';
 export * from './project/vo/LineText';

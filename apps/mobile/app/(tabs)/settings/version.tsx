@@ -1,4 +1,4 @@
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { Image, ScrollView, Text, View } from "react-native";

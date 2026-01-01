@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createProjectUseCase } from '@/application/usecases/project/CreateProjectUseCase';
-import { SectionItem } from '@/components/projects/SectionManager';
+import { SectionItem } from '@/components/shared/SectionManager';
 
 export function useCreateProject() {
   const queryClient = useQueryClient();
@@ -18,7 +18,7 @@ export function useCreateProject() {
     },
     onSuccess: () => {
       // プロジェクト一覧を再取得
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['projects', 'overview'] });
     },
   });
 

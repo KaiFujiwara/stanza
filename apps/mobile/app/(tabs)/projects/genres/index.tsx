@@ -1,16 +1,16 @@
-import { FlatList } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
-import { ScreenHeader } from "@/components/ScreenHeader";
-import { FloatingActionButton } from "@/components/FloatingActionButton";
-import { HelpModal } from "@/components/HelpModal";
-import { EmptyState } from "@/components/EmptyState";
-import { ItemCountBadge } from "@/components/ItemCountBadge";
 import { GenreCard } from "@/components/genres/GenreCard";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { FloatingActionButton } from "@/components/shared/FloatingActionButton";
+import { HelpModal } from "@/components/shared/HelpModal";
+import { ItemCountBadge } from "@/components/shared/ItemCountBadge";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { useGenres } from "@/hooks/genre";
 import { GenreListItem } from "@/infra/query/genre";
-import { useRouter } from "expo-router";
 import { MAX_GENRES_PER_USER } from "@lyrics-notes/core";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function GenresScreen() {
   const router = useRouter();

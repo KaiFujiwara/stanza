@@ -11,8 +11,11 @@ export function useDeleteProject() {
     mutationFn: async (id: string) => {
       return await deleteProjectUseCase.execute({ id });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+    onSuccess: (_, id) => {
+      // プロジェクト一覧を再フェッチ
+      queryClient.invalidateQueries({ queryKey: ['projects', 'overview'] });
+      // 削除したプロジェクトの詳細キャッシュも削除
+      queryClient.removeQueries({ queryKey: projectKeys.detail(id) });
     },
   });
 

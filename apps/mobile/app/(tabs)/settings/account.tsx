@@ -1,4 +1,4 @@
-import { ScreenHeader } from "@/components/ScreenHeader";
+import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";

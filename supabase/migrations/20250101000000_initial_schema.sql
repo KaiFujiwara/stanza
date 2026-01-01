@@ -83,11 +83,12 @@ CREATE TABLE sections (
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   name VARCHAR(50) NOT NULL,
   order_index INTEGER NOT NULL DEFAULT 0,
-  lines TEXT[] NOT NULL DEFAULT '{}',
+  content TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-  CONSTRAINT sections_name_not_empty CHECK (LENGTH(TRIM(name)) > 0)
+  CONSTRAINT sections_name_not_empty CHECK (LENGTH(TRIM(name)) > 0),
+  CONSTRAINT sections_content_length CHECK (LENGTH(content) <= 3000)
   -- Note: sections_max_per_project constraint removed (subqueries not allowed in CHECK)
   -- This validation should be handled at the application layer
 );
