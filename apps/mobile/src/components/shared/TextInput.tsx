@@ -58,11 +58,11 @@ export function TextInput({
       {(showCharCount || helperText) && (
         <View className="flex-row justify-between items-center mt-1 px-1">
           <Text className="text-xs text-gray-500">
-            {helperText || `最大${maxLength}文字`}
+            {helperText || ''}
           </Text>
           {showCharCount && (
             <Text className={`text-xs ${isOverLimit ? 'text-red-500' : 'text-gray-400'}`}>
-              {value.length}/{maxLength}
+              {value.length}/{maxLength}文字
             </Text>
           )}
         </View>

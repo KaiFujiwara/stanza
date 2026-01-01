@@ -5,4 +5,5 @@ export interface GenreRepository {
   findById(id: EntityId): Promise<Genre | null>;
   save(genre: Genre): Promise<void>;
   delete(id: EntityId): Promise<void>;
+  countByUser(): Promise<number>;
 }

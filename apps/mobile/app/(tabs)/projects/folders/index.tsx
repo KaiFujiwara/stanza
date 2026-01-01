@@ -13,6 +13,7 @@ import { ItemCountBadge } from "@/components/ItemCountBadge";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { FolderWithCount } from '@/infra/query/folder';
 import { useFolders, useReorderFolders } from "@/hooks/folder";
+import { MAX_FOLDERS_PER_USER } from "@lyrics-notes/core";
 
 export default function FoldersEditScreen() {
   const router = useRouter();
@@ -140,7 +141,7 @@ export default function FoldersEditScreen() {
           visible={helpModalVisible}
           onClose={() => setHelpModalVisible(false)}
           title="フォルダについて"
-          content="フォルダは、プロジェクトを整理・分類するための機能です。アルバムやテーマごとにプロジェクトをまとめて管理できます。&#10;&#10;フォルダは最大10個まで作成できます。並び替えボタンでフォルダの表示順序を変更できます。"
+          content={`フォルダは、プロジェクトを整理・分類するための機能です。アルバムやテーマごとにプロジェクトをまとめて管理できます。\n\nフォルダは最大${MAX_FOLDERS_PER_USER}個まで作成できます。並び替えボタンでフォルダの表示順序を変更できます。`}
         />
       </SafeAreaView>
     </GestureHandlerRootView>

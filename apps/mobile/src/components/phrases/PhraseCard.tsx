@@ -36,10 +36,7 @@ export function PhraseCard({ item, onPress }: PhraseCardProps) {
               className="px-2 py-1 rounded-full border"
               style={{ borderColor: tag.color ?? DEFAULT_TAG_COLOR }}
             >
-              <Text
-                className="text-xs font-medium"
-                style={{ color: tag.color ?? DEFAULT_TAG_COLOR }}
-              >
+              <Text className="text-xs font-medium text-black">
                 {tag.name}
               </Text>
             </View>
@@ -55,7 +52,7 @@ export function PhraseCard({ item, onPress }: PhraseCardProps) {
       {/* 更新日時 */}
       <View className="flex-row items-center">
         <MaterialIcons name="update" size={14} color="#9CA3AF" />
-        <Text className="text-sm text-gray-500 ml-1">
+        <Text className="text-xs text-gray-400 ml-1">
           最終更新: {new Date(item.updatedAt).toLocaleDateString('ja-JP', {
             year: 'numeric',
             month: '2-digit',

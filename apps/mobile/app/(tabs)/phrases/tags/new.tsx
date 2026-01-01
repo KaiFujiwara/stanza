@@ -18,7 +18,7 @@ export default function NewTagScreen() {
 
   const handleCreateTag = async () => {
     if (!tagName.trim()) {
-      Alert.alert('エラー', 'タグ名を入力してください');
+      Alert.alert('入力エラー', 'タグ名を入力してください');
       return;
     }
 
@@ -70,11 +70,9 @@ export default function NewTagScreen() {
                 editable={!isCreating}
                 maxLength={MAX_TAG_NAME_LENGTH}
                 showCharCount
-                helperText=""
+                helperText="フレーズを分類するためのタグ名を入力してください"
               />
-              <Text className="text-xs text-gray-500 mt-2 mb-6">
-                フレーズを分類するためのタグ名を入力してください
-              </Text>
+              <View className="mb-6" />
 
               {/* カラー選択 */}
               <Text className="text-sm font-medium text-gray-500 mb-3">カラー（任意）</Text>

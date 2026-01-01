@@ -11,16 +11,16 @@
   - **Section** (子エンティティ): 曲内のパート（Aメロ/サビなど）。`id`, `projectId`, `name`, `orderIndex`, `lines: string[]`
 - **Phrase**: プロジェクト外のストックメモ。`id`, `text`, `note?`, `tagIds[]`, `createdAt`, `updatedAt`
 - **Tag**: フレーズに付けるラベル。`id`, `name`, `createdAt`, `updatedAt`
-- **Genre** (集約ルート): ユーザーのジャンルテンプレ。`id`, `name`, `description?`, `createdAt`, `updatedAt`
-  - **GenreTemplateSection** (子エンティティ): `id`, `genreId`, `name`, `orderIndex`
+- **Genre** (集約ルート): ユーザーのジャンルテンプレ。`id`, `name`, `description?`, `sectionNames: string[]`, `createdAt`, `updatedAt`
 
 ### 集約の設計方針
 
 - **Project → Section → lines[]**: Sectionは子エンティティ。歌詞行(lines)は単純なstring配列として保持
-- **Genre → GenreTemplateSection**: GenreTemplateSectionは子エンティティ
+- **Genre → sectionNames[]**: セクション名は値オブジェクトの配列として保持（エンティティではない）
 - **順序管理**:
   - 集約ルート同士 (Folder, Project): リポジトリの`reorder()`で一括更新
-  - 集約内 (Section, GenreTemplateSection): 親エンティティの`reorder*()`メソッドで管理
+  - 集約内 (Section): 親エンティティの`reorder*()`メソッドで管理
+  - 値オブジェクト配列 (Genre.sectionNames): 配列のインデックスで順序を管理
 
 ## DBスキーマ (Supabase想定)
 
@@ -75,14 +75,9 @@ genres
   - user_id (uuid, fk -> auth.users)
   - name (text)
   - description (text, nullable)
+  - section_names (text[], セクション名の配列。配列のインデックスが順序を表す)
   - created_at (timestamp)
   - updated_at (timestamp)
-
-genre_template_sections
-  - id (uuid, pk)
-  - genre_id (uuid, fk -> genres)
-  - name (text)
-  - order_index (integer)
 ```
 
 ### トリガーと制約

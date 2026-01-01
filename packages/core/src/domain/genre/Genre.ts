@@ -1,27 +1,38 @@
 import { EntityId } from '../shared/EntityId';
+import { DomainError } from '../shared/errors/DomainError';
+import { ErrorCode } from '../shared/errors/ErrorCode';
+import { MAX_SECTIONS_PER_GENRE } from '../../constants/limits';
 import { GenreDescription, GenreDescriptionValue } from './vo/GenreDescription';
 import { GenreName, GenreNameValue } from './vo/GenreName';
-import { GenreTemplateSection } from './GenreTemplateSection';
+import { TemplateSectionName, TemplateSectionNameValue } from './vo/TemplateSectionName';
 
 // ドメインエンティティ：Genre（ユーザーのジャンルテンプレ）
 export class Genre {
-  private static readonly MAX_TEMPLATE_SECTIONS = 20;
 
   private _id: EntityId;
   private _name: GenreNameValue;
   private _description?: GenreDescriptionValue;
-  private _templateSections: GenreTemplateSection[];
+  private _sectionNames: TemplateSectionNameValue[];
 
   private constructor(
     id: EntityId,
     name: string,
     description: string | undefined,
-    templateSections: GenreTemplateSection[]
+    sectionNames: string[]
   ) {
+    // セクション数の上限チェック
+    if (sectionNames.length > MAX_SECTIONS_PER_GENRE) {
+      throw new DomainError(
+        ErrorCode.MAX_COUNT_EXCEEDED,
+        `テンプレートセクション数の上限を超えています（最大: ${MAX_SECTIONS_PER_GENRE}）`,
+        { maxCount: MAX_SECTIONS_PER_GENRE, currentCount: sectionNames.length }
+      );
+    }
+
     this._id = id;
     this._name = GenreName.validate(name);
     this._description = GenreDescription.validate(description);
-    this._templateSections = templateSections;
+    this._sectionNames = sectionNames.map(name => TemplateSectionName.validate(name));
   }
 
   get id(): EntityId {
@@ -36,19 +47,19 @@ export class Genre {
     return this._description;
   }
 
-  get templateSections(): readonly GenreTemplateSection[] {
-    return [...this._templateSections];
+  get sectionNames(): readonly TemplateSectionNameValue[] {
+    return [...this._sectionNames];
   }
 
   static create(
     name: string,
-    options: { description?: string } = {}
+    options: { description?: string; sectionNames?: string[] } = {}
   ): Genre {
     return new Genre(
       EntityId.generate(),
       name,
       options.description,
-      []
+      options.sectionNames || []
     );
   }
 
@@ -56,13 +67,13 @@ export class Genre {
     id: EntityId,
     name: string,
     description: string | undefined,
-    templateSections: GenreTemplateSection[]
+    sectionNames: string[]
   ): Genre {
     return new Genre(
       id,
       name,
       description,
-      templateSections
+      sectionNames
     );
   }
 
@@ -76,66 +87,16 @@ export class Genre {
     this._description = validatedDescription;
   }
 
-  // セクション追加
-  addTemplateSection(name: string): GenreTemplateSection {
-    if (this._templateSections.length >= Genre.MAX_TEMPLATE_SECTIONS) {
-      throw new Error(
-        `テンプレートセクション数の上限を超えています（最大: ${Genre.MAX_TEMPLATE_SECTIONS}）`
+  setSectionNames(sectionNames: string[]): void {
+    // 上限チェック
+    if (sectionNames.length > MAX_SECTIONS_PER_GENRE) {
+      throw new DomainError(
+        ErrorCode.MAX_COUNT_EXCEEDED,
+        `テンプレートセクション数の上限を超えています（最大: ${MAX_SECTIONS_PER_GENRE}）`,
+        { maxCount: MAX_SECTIONS_PER_GENRE, currentCount: sectionNames.length }
       );
     }
-
-    const section = GenreTemplateSection.create(
-      this._id,
-      name,
-      this._templateSections.length
-    );
-
-    this._templateSections.push(section);
-    return section;
-  }
-
-  // セクション名変更
-  updateTemplateSectionName(sectionId: string, newName: string): void {
-    const section = this._templateSections.find(s => s.id === sectionId);
-    if (!section) {
-      throw new Error(`テンプレートセクションが見つかりません: ${sectionId}`);
-    }
-    section.updateName(newName);
-  }
-
-  // セクション削除
-  removeTemplateSection(sectionId: string): void {
-    const index = this._templateSections.findIndex(s => s.id === sectionId);
-    if (index === -1) {
-      throw new Error(`テンプレートセクションが見つかりません: ${sectionId}`);
-    }
-
-    this._templateSections.splice(index, 1);
-
-    // orderIndex を振り直し
-    this._templateSections.forEach((section, idx) => {
-      section.reorder(idx);
-    });
-  }
-
-  // セクション並び替え
-  reorderTemplateSections(orderedIds: string[]): void {
-    if (orderedIds.length !== this._templateSections.length) {
-      throw new Error('並び替え対象のセクション数が一致しません');
-    }
-
-    const reordered = orderedIds.map(id => {
-      const section = this._templateSections.find(s => s.id === id);
-      if (!section) {
-        throw new Error(`テンプレートセクションが見つかりません: ${id}`);
-      }
-      return section;
-    });
-
-    reordered.forEach((section, index) => {
-      section.reorder(index);
-    });
-
-    this._templateSections = reordered;
+    // バリデーション
+    this._sectionNames = sectionNames.map(name => TemplateSectionName.validate(name));
   }
 }

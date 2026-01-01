@@ -37,9 +37,19 @@ export function ProjectCard({ item, onPress }: ProjectCardProps) {
         </View>
         <MaterialIcons name="chevron-right" size={20} color="#9CA3AF" />
       </View>
-      <Text className="text-sm text-gray-500">
-        {new Date(item.updatedAt).toLocaleDateString('ja-JP')}
-      </Text>
+      <View className="flex-row items-center">
+        <MaterialIcons name="update" size={14} color="#9CA3AF" />
+        <Text className="text-xs text-gray-400 ml-1">
+          最終更新：{new Date(item.updatedAt).toLocaleDateString('ja-JP', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          })} {new Date(item.updatedAt).toLocaleTimeString('ja-JP', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 }

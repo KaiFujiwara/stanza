@@ -53,6 +53,7 @@ export default function PhraseDetailScreen() {
       note: editNote.trim() || undefined,
       tagIds: selectedTagIds,
     });
+    router.back();
   };
 
   // フレーズ削除
@@ -144,7 +145,7 @@ export default function PhraseDetailScreen() {
 
               {/* メモ */}
               <View className="mb-6">
-                <Text className="text-sm font-medium text-gray-500 mb-2">メモ</Text>
+                <Text className="text-sm font-medium text-gray-500 mb-2">メモ（任意）</Text>
                 <TextInput
                   value={editNote}
                   onChangeText={setEditNote}

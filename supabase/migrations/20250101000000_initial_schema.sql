@@ -32,6 +32,7 @@ CREATE TABLE genres (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name VARCHAR(50) NOT NULL,
   description TEXT,
+  section_names TEXT[] NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
@@ -40,22 +41,6 @@ CREATE TABLE genres (
 
 CREATE INDEX idx_genres_user_id ON genres(user_id);
 CREATE INDEX idx_genres_user_name ON genres(user_id, name);
-
--- ============================================================================
--- 4. Genre Template Sections (ジャンルのセクションテンプレート)
--- ============================================================================
-CREATE TABLE genre_template_sections (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  genre_id UUID NOT NULL REFERENCES genres(id) ON DELETE CASCADE,
-  name VARCHAR(50) NOT NULL,
-  order_index INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-  CONSTRAINT genre_template_sections_name_not_empty CHECK (LENGTH(TRIM(name)) > 0)
-);
-
-CREATE INDEX idx_genre_template_sections_genre_id ON genre_template_sections(genre_id);
-CREATE INDEX idx_genre_template_sections_order ON genre_template_sections(genre_id, order_index);
 
 -- ============================================================================
 -- 5. Projects Table (集約ルート)
@@ -204,7 +189,6 @@ CREATE TRIGGER update_phrases_updated_at BEFORE UPDATE ON phrases
 -- RLS有効化
 ALTER TABLE folders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE genres ENABLE ROW LEVEL SECURITY;
-ALTER TABLE genre_template_sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
@@ -244,31 +228,6 @@ CREATE POLICY "Users can update their own genres"
 CREATE POLICY "Users can delete their own genres"
   ON genres FOR DELETE
   USING (auth.uid() = user_id);
-
--- Genre Template Sections ポリシー
-CREATE POLICY "Users can view their own genre templates"
-  ON genre_template_sections FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM genres WHERE genres.id = genre_template_sections.genre_id AND genres.user_id = auth.uid()
-  ));
-
-CREATE POLICY "Users can insert their own genre templates"
-  ON genre_template_sections FOR INSERT
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM genres WHERE genres.id = genre_template_sections.genre_id AND genres.user_id = auth.uid()
-  ));
-
-CREATE POLICY "Users can update their own genre templates"
-  ON genre_template_sections FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM genres WHERE genres.id = genre_template_sections.genre_id AND genres.user_id = auth.uid()
-  ));
-
-CREATE POLICY "Users can delete their own genre templates"
-  ON genre_template_sections FOR DELETE
-  USING (EXISTS (
-    SELECT 1 FROM genres WHERE genres.id = genre_template_sections.genre_id AND genres.user_id = auth.uid()
-  ));
 
 -- Projects ポリシー
 CREATE POLICY "Users can view their own projects"

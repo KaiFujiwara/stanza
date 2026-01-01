@@ -10,6 +10,7 @@ import { TagCard } from "@/components/tags/TagCard";
 import { useTags } from "@/hooks/tag";
 import { Tag } from "@/infra/query/tag";
 import { useRouter } from "expo-router";
+import { MAX_TAGS_PER_USER } from "@lyrics-notes/core";
 
 export default function TagsScreen() {
   const router = useRouter();
@@ -56,7 +57,7 @@ export default function TagsScreen() {
         visible={helpModalVisible}
         onClose={() => setHelpModalVisible(false)}
         title="タグについて"
-        content="タグは、フレーズを分類・整理するためのラベルです。テーマや感情、言葉のカテゴリーなど、自由に設定できます。&#10;&#10;各タグには色をつけることができ、視覚的に区別しやすくなります。&#10;&#10;タグは最大20個まで作成できます。"
+        content={`タグは、フレーズを分類・整理するためのラベルです。テーマや感情、言葉のカテゴリーなど、自由に設定できます。\n\n各タグには色をつけることができ、視覚的に区別しやすくなります。\n\nタグは最大${MAX_TAGS_PER_USER}個まで作成できます。`}
       />
 
       <FloatingActionButton onPress={() => router.push('/phrases/tags/new')} disabled={!canCreate} />

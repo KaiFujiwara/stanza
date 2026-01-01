@@ -67,11 +67,8 @@ export default function NewFolderScreen() {
               editable={!createMutation.isPending}
               maxLength={MAX_FOLDER_NAME_LENGTH}
               showCharCount
-              helperText=""
+              helperText="フォルダを作成すると、プロジェクトを整理しやすくなります"
             />
-            <Text className="text-xs text-gray-500 mt-2">
-              フォルダを作成すると、プロジェクトを整理しやすくなります
-            </Text>
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

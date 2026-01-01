@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MAX_PHRASES_PER_USER } from "@lyrics-notes/core";
 
 export default function PhrasesScreen() {
   const router = useRouter();
@@ -133,7 +134,7 @@ export default function PhrasesScreen() {
         visible={helpModalVisible}
         onClose={() => setHelpModalVisible(false)}
         title="フレーズについて"
-        content="フレーズストックは、思いついた歌詞のフレーズを保存しておく機能です。気に入ったフレーズをストックしておき、後で歌詞制作に活用できます。&#10;&#10;タグ整理することで、必要な時にすぐに見つけられます。&#10;&#10;フレーズは最大200個まで作成できます。"
+        content={`フレーズストックは、思いついた歌詞のフレーズを保存しておく機能です。気に入ったフレーズをストックしておき、後で歌詞制作に活用できます。\n\nタグ整理することで、必要な時にすぐに見つけられます。\n\nフレーズは最大${MAX_PHRASES_PER_USER}個まで作成できます。`}
       />
 
       <TagFilterModal

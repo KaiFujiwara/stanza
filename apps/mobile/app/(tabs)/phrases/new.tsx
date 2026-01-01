@@ -24,23 +24,12 @@ export default function NewPhraseScreen() {
       return;
     }
 
-    createPhrase(
-      {
-        text: phraseText.trim(),
-        note: phraseNote.trim() || undefined,
-        tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
-      },
-      {
-        onSuccess: () => {
-          router.back();
-        },
-        onError: (error) => {
-          console.error('[NewPhrase] フレーズ作成エラー:', error);
-          const errorMessage = error instanceof Error ? error.message : 'フレーズの作成に失敗しました';
-          Alert.alert('エラー', errorMessage);
-        },
-      }
-    );
+    await createPhrase({
+      text: phraseText.trim(),
+      note: phraseNote.trim() || undefined,
+      tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
+    });
+    router.back();
   };
 
   const handleTagToggle = (tagId: string) => {
@@ -92,11 +81,9 @@ export default function NewPhraseScreen() {
               editable={!isCreating}
               maxLength={MAX_PHRASE_TEXT_LENGTH}
               showCharCount
-              helperText=""
+              helperText="思いついた歌詞のフレーズを入力してください"
             />
-            <Text className="text-xs text-gray-500 mt-2 mb-6">
-              思いついた歌詞のフレーズを入力してください
-            </Text>
+            <View className="mb-6" />
 
             {/* メモ */}
             <Text className="text-sm font-medium text-gray-500 mb-2">メモ（任意）</Text>
@@ -107,11 +94,9 @@ export default function NewPhraseScreen() {
               editable={!isCreating}
               maxLength={MAX_PHRASE_NOTE_LENGTH}
               showCharCount
-              helperText=""
+              helperText="このフレーズについてのメモを残せます"
             />
-            <Text className="text-xs text-gray-500 mt-2 mb-6">
-              このフレーズについてのメモを残せます
-            </Text>
+            <View className="mb-6" />
 
             {/* タグ選択 */}
             <Text className="text-sm font-medium text-gray-500 mb-3">タグ（任意）</Text>
