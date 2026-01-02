@@ -1,15 +1,21 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - preview
+          - production
 
 jobs:
-  deploy-preview:
-    name: Deploy Preview
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    environment: preview
+    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,12 +34,12 @@ jobs:
         with:
           version: latest
 
-      - name: Link to Supabase Preview
+      - name: Link to Supabase
         run: supabase link --project-ref ${{ vars.SUPABASE_PROJECT_REF }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      - name: Deploy migrations to Preview
+      - name: Deploy migrations
         run: supabase db push
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -44,47 +50,5 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build Preview on EAS
-        run: npx eas build --platform ios --profile preview --non-interactive
-
-  deploy-production:
-    name: Deploy Production
-    runs-on: ubuntu-latest
-    environment: production
-    needs: deploy-preview
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Link to Supabase Production
-        run: supabase link --project-ref ${{ vars.SUPABASE_PROJECT_REF }}
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
-      - name: Deploy migrations to Production
-        run: supabase db push
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
-      - name: Setup EAS CLI
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Build Production on EAS
-        run: npx eas build --platform ios --profile production --non-interactive
+      - name: Build on EAS
+        run: npm exec -- eas build --platform ios --profile ${{ inputs.environment }} --non-interactive
