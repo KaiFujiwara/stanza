@@ -1,15 +1,21 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { ensureAnonymousAuth } from '@/lib/supabase/auth';
+import { View, ActivityIndicator } from 'react-native';
+import { checkSession, signOut as authSignOut } from '@/lib/supabase/auth';
+import { supabase } from '@/lib/supabase/client';
+import type { Session } from '@supabase/supabase-js';
 
 interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
+  session: Session | null;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
   isAuthenticated: false,
   isLoading: true,
+  session: null,
+  signOut: async () => {},
 });
 
 export function useAuth() {
@@ -19,48 +25,49 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    async function initAuth() {
-      try {
-        await ensureAnonymousAuth();
-        setIsAuthenticated(true);
-      } catch (err) {
-        console.error('[AuthProvider] 認証エラー:', err);
-        setError(err as Error);
-      } finally {
-        setIsLoading(false);
+    // 初回セッションチェック
+    checkSession().then((hasSession) => {
+      setIsAuthenticated(hasSession);
+      if (hasSession) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setSession(session);
+        });
       }
-    }
+      setIsLoading(false);
+    });
 
-    initAuth();
+    // 認証状態の変更を監視
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const signOut = async () => {
+    await authSignOut();
+    setIsAuthenticated(false);
+    setSession(null);
+  };
 
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="mt-4 text-gray-600">認証中...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View className="flex-1 justify-center items-center p-5 bg-white">
-        <Text className="text-xl font-bold text-red-600 mb-2">
-          認証エラー
-        </Text>
-        <Text className="text-sm text-gray-600 text-center">
-          {error.message}
-        </Text>
       </View>
     );
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, session, signOut }}>
       {children}
     </AuthContext.Provider>
   );
