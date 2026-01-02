@@ -2,8 +2,9 @@ import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { MaterialIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "@/providers/AuthProvider";
 
 type SettingItem = {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -21,10 +22,38 @@ type SettingSection = {
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { signOut } = useAuth();
   const appVersion = Constants.expoConfig?.version || "1.0.0";
 
   const handleGoogleAccountLink = () => {
     router.push("/settings/account");
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      "ログアウト",
+      "本当にログアウトしますか？",
+      [
+        {
+          text: "キャンセル",
+          style: "cancel",
+        },
+        {
+          text: "ログアウト",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await signOut();
+              router.replace("/login");
+            } catch (error) {
+              console.error("[SettingsScreen] Logout error:", error);
+              Alert.alert("エラー", "ログアウトに失敗しました");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const handleTutorial = () => {
@@ -52,19 +81,6 @@ export default function SettingsScreen() {
   };
 
   const sections: SettingSection[] = [
-    {
-      title: "アカウント",
-      items: [
-        {
-          icon: "account-circle",
-          title: "Googleアカウント連携",
-          subtitle: "データ同期・Web版連携",
-          onPress: handleGoogleAccountLink,
-          showChevron: true,
-          badge: "未連携",
-        },
-      ],
-    },
     {
       title: "情報・サポート",
       items: [
@@ -112,6 +128,18 @@ export default function SettingsScreen() {
           subtitle: `Version ${appVersion}`,
           onPress: handleVersion,
           showChevron: true,
+        },
+      ],
+    },
+    {
+      title: "アカウント",
+      items: [
+        {
+          icon: "logout",
+          title: "ログアウト",
+          subtitle: "アプリからログアウトします",
+          onPress: handleLogout,
+          showChevron: false,
         },
       ],
     },

@@ -18,7 +18,9 @@
     "test": "npm run test --workspaces --if-present",
     "test:core": "npm run test --workspace=@stanza/core",
     "test:mobile": "npm run test --workspace=@stanza/mobile",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "devDependencies": {
     "concurrently": "^9.0.1",
@@ -26,6 +28,9 @@
     "typescript": "~5.9.2"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.90.15"
+    "@tanstack/react-query": "^5.90.15",
+    "expo": "~54.0.30",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
   }
 }

@@ -28,7 +28,21 @@
    npm install
    ```
 
-3. **Supabase ローカル環境を起動**
+3. **環境変数を設定**
+
+   **Supabase ローカル環境用**（Google OAuth を使用する場合）:
+   ```bash
+   cp supabase/.env.local.sample supabase/.env.local
+   # supabase/.env.local に Google OAuth の認証情報を記入
+   ```
+
+   **モバイルアプリ用**:
+   ```bash
+   cp apps/mobile/.env.example apps/mobile/.env
+   # apps/mobile/.env に Supabase 接続情報を記入（次の手順で取得）
+   ```
+
+4. **Supabase ローカル環境を起動**
 
    Docker Desktop を起動してから、以下を実行:
    ```bash
@@ -39,16 +53,12 @@
    - Studio (管理画面): http://localhost:54323
    - API: http://localhost:54321
 
-4. **データベースマイグレーションを適用**
+5. **データベースマイグレーションを適用**
    ```bash
    npx supabase db reset
    ```
 
-5. **環境変数を設定**
-   ```bash
-   cp apps/mobile/.env.example apps/mobile/.env
-   # apps/mobile/.env に `npx supabase start` で表示された接続情報を記入
-   ```
+   `npx supabase start` の出力から接続情報を [apps/mobile/.env](apps/mobile/.env) に記入してください。
 
    **Supabase URL の設定について**:
    - **iOSシミュレーター**: `http://localhost:54321`
@@ -58,7 +68,7 @@
 
    ローカルIPはWi-Fi環境によって変わります（例: 192.168.1.5, 192.168.3.4など）。
 
-6. **開発サーバーを起動**
+7. **開発サーバーを起動**
    ```bash
    npm run dev
    ```
