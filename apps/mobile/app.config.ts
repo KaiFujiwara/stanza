@@ -1,14 +1,16 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
-const IS_DEV = process.env.APP_ENV === 'development';
+const APP_ENV = process.env.APP_ENV;
 
 const getUniqueIdentifier = () => {
-  if (IS_DEV) return 'com.somedon.stanza.dev';
+  if (APP_ENV === 'development') return 'com.somedon.stanza.dev';
+  if (APP_ENV === 'preview') return 'com.somedon.stanza.preview';
   return 'com.somedon.stanza';
 };
 
 const getAppName = () => {
-  if (IS_DEV) return 'Stanza (Dev)';
+  if (APP_ENV === 'development') return 'Stanza (Dev)';
+  if (APP_ENV === 'preview') return 'Stanza (Preview)';
   return 'Stanza';
 };
 

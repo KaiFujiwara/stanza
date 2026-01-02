@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
-    "start": "dotenv -e .env -- expo start",
+    "start": "dotenv -e .env -- expo start --dev-client",
     "build:ios:dev": "eas build -p ios --profile development",
     "build:ios:preview": "eas build -p ios --profile preview",
     "build:ios:prod": "eas build -p ios --profile production",
