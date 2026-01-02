@@ -73,9 +73,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     eas: {
       projectId: '42e7dcd9-df01-4b13-b787-8fa9756e0385',
     },
-    env: process.env.APP_ENV || 'production',
-    supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
-    supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     // アプリ設定
     appName: 'Stanza',
     supportEmail: 'stanza.app.contact@gmail.com',
