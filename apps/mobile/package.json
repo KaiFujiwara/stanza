@@ -1,7 +1,7 @@
 {
   "name": "@stanza/mobile",
   "version": "1.0.0",
-  "main": "node_modules/expo-router/entry",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "dotenv -e .env -- expo start",
     "start:dev": "dotenv -e .env -- expo start",

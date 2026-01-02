@@ -326,7 +326,7 @@ export default function ProjectDetailScreen() {
                     </View>
                   ) : (
                     sections.map((section, index) => (
-                      <View key={section.id} className="mb-6">
+                      <View key={section.id || `section-${index}`} className="mb-6">
                         {/* セクション名 */}
                         <Text className="text-sm font-medium text-gray-500 mb-2">
                           {section.name || `セクション ${index + 1}`}
