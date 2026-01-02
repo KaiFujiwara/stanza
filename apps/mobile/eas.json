@@ -8,6 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
+        "APP_ENV": "development",
         ".env": ".env"
       }
     },

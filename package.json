@@ -9,7 +9,6 @@
   ],
   "scripts": {
     "dev": "npm run start --workspace=@stanza/mobile",
-    "start:dev": "npm run dev",
     "build:ios:dev": "npm run build:ios:dev --workspace=@stanza/mobile",
     "build:ios:preview": "npm run build:ios:preview --workspace=@stanza/mobile",
     "build:ios:prod": "npm run build:ios:prod --workspace=@stanza/mobile",
@@ -19,7 +18,6 @@
     "test:core": "npm run test --workspace=@stanza/core",
     "test:mobile": "npm run test --workspace=@stanza/mobile",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "android": "expo run:android",
     "ios": "expo run:ios"
   },
   "devDependencies": {
