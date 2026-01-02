@@ -7,7 +7,7 @@ import { TextInput } from '@/components/shared/TextInput';
 import { HeaderActionButton } from '@/components/shared/HeaderActionButton';
 import { useCreateTag, useTags } from '@/hooks/tag';
 import { TAG_COLOR_PRESETS } from '@/constants/tagColors';
-import { MAX_TAG_NAME_LENGTH } from '@lyrics-notes/core';
+import { MAX_TAG_NAME_LENGTH } from '@stanza/core';
 
 export default function NewTagScreen() {
   const router = useRouter();

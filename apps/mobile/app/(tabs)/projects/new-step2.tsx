@@ -17,7 +17,7 @@ import { useGenres } from '@/hooks/genre';
 import { useInitializedState } from '@/hooks/shared/useInitializedState';
 import { HeaderActionButton } from '@/components/shared/HeaderActionButton';
 import { SectionManager, SectionItem } from '@/components/shared/SectionManager';
-import { MAX_SECTIONS_PER_PROJECT } from '@lyrics-notes/core';
+import { MAX_SECTIONS_PER_PROJECT } from '@stanza/core';
 
 export default function NewProjectStep2Screen() {
   const router = useRouter();

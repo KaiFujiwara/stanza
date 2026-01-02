@@ -6,7 +6,7 @@ import { ItemCountBadge } from "@/components/shared/ItemCountBadge";
 import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { useGenres } from "@/hooks/genre";
 import { GenreListItem } from "@/infra/query/genre";
-import { MAX_GENRES_PER_USER } from "@lyrics-notes/core";
+import { MAX_GENRES_PER_USER } from "@stanza/core";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { FlatList } from "react-native";

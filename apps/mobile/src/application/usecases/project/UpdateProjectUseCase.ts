@@ -6,7 +6,7 @@ import {
   ErrorCode,
   ProjectRepository,
   GenreRepository,
-} from '@lyrics-notes/core';
+} from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type UpdateProjectInput = {

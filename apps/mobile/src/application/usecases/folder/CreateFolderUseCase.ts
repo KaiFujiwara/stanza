@@ -1,4 +1,4 @@
-import { Folder, FolderRepository } from '@lyrics-notes/core';
+import { Folder, FolderRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreateFolderInput = {

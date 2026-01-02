@@ -1,5 +1,5 @@
 import { UpdateTagUseCase } from '@/application/usecases/tag/UpdateTagUseCase';
-import { EntityId, Tag, TagRepository } from '@lyrics-notes/core';
+import { EntityId, Tag, TagRepository } from '@stanza/core';
 
 describe('UpdateTagUseCase', () => {
   let useCase: UpdateTagUseCase;

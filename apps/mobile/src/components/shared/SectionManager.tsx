@@ -2,7 +2,7 @@ import { useState, useRef, useMemo, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import DragList, { DragListRenderItemInfo } from 'react-native-draglist';
-import { MAX_TEMPLATE_SECTION_NAME_LENGTH } from '@lyrics-notes/core';
+import { MAX_TEMPLATE_SECTION_NAME_LENGTH } from '@stanza/core';
 
 export interface SectionItem {
   id?: string;

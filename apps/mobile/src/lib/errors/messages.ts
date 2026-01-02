@@ -1,4 +1,4 @@
-import { ErrorCode } from '@lyrics-notes/core';
+import { ErrorCode } from '@stanza/core';
 
 /**
  * エラーメッセージの型定義

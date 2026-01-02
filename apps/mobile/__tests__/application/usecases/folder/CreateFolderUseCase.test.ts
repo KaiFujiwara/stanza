@@ -1,5 +1,5 @@
 import { CreateFolderUseCase } from '@/application/usecases/folder/CreateFolderUseCase';
-import { FolderRepository } from '@lyrics-notes/core';
+import { FolderRepository } from '@stanza/core';
 
 describe('CreateFolderUseCase', () => {
   let useCase: CreateFolderUseCase;

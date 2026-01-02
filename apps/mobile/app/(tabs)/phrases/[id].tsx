@@ -7,7 +7,7 @@ import { HeaderActionButton } from "@/components/shared/HeaderActionButton";
 import { TextInput } from "@/components/shared/TextInput";
 import { TagSelector } from "@/components/phrases/TagSelector";
 import { usePhraseDetail } from "@/hooks/phrase";
-import { MAX_PHRASE_TEXT_LENGTH, MAX_PHRASE_NOTE_LENGTH } from "@lyrics-notes/core";
+import { MAX_PHRASE_TEXT_LENGTH, MAX_PHRASE_NOTE_LENGTH } from "@stanza/core";
 
 export default function PhraseDetailScreen() {
   const router = useRouter();

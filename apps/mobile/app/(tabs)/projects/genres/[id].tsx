@@ -3,7 +3,7 @@ import { SectionManager, SectionItem } from '@/components/shared/SectionManager'
 import { useDeleteGenre, useGenreDetail, useUpdateGenre } from '@/hooks/genre';
 import { useInitializedState } from '@/hooks/shared/useInitializedState';
 import { MaterialIcons } from '@expo/vector-icons';
-import { MAX_GENRE_DESCRIPTION_LENGTH, MAX_GENRE_NAME_LENGTH, MAX_SECTIONS_PER_GENRE } from '@lyrics-notes/core';
+import { MAX_GENRE_DESCRIPTION_LENGTH, MAX_GENRE_NAME_LENGTH, MAX_SECTIONS_PER_GENRE } from '@stanza/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useMemo, useRef } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';

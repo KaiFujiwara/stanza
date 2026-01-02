@@ -1,22 +1,25 @@
 {
-  "name": "lyrics-notes-monorepo",
+  "name": "stanza",
   "version": "1.0.0",
   "private": true,
+  "main": "node_modules/expo-router/entry",
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run start --workspace=@lyrics-notes/mobile",
+    "dev": "npm run start --workspace=@stanza/mobile",
     "start:dev": "npm run dev",
-    "firebase:emulator": "npm run emulator --workspace=@lyrics-notes/firebase",
-    "dev:all": "concurrently -k -n expo,firebase \"npm run start --workspace=@lyrics-notes/mobile\" \"npm run emulator --workspace=@lyrics-notes/firebase\"",
-    "build:ios:dev": "npm run build:ios:dev --workspace=@lyrics-notes/mobile",
-    "build:ios:prod": "npm run build:ios:prod --workspace=@lyrics-notes/mobile",
+    "firebase:emulator": "npm run emulator --workspace=@stanza/firebase",
+    "dev:all": "concurrently -k -n expo,firebase \"npm run start --workspace=@stanza/mobile\" \"npm run emulator --workspace=@stanza/firebase\"",
+    "build:ios:dev": "npm run build:ios:dev --workspace=@stanza/mobile",
+    "build:ios:preview": "npm run build:ios:preview --workspace=@stanza/mobile",
+    "build:ios:prod": "npm run build:ios:prod --workspace=@stanza/mobile",
+    "submit:ios:prod": "npm run submit:ios:prod --workspace=@stanza/mobile",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "test:core": "npm run test --workspace=@lyrics-notes/core",
-    "test:mobile": "npm run test --workspace=@lyrics-notes/mobile",
+    "test:core": "npm run test --workspace=@stanza/core",
+    "test:mobile": "npm run test --workspace=@stanza/mobile",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {

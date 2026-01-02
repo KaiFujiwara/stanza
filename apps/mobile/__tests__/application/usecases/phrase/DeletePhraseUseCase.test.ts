@@ -1,5 +1,5 @@
 import { DeletePhraseUseCase } from '@/application/usecases/phrase/DeletePhraseUseCase';
-import { EntityId, Phrase, PhraseRepository } from '@lyrics-notes/core';
+import { EntityId, Phrase, PhraseRepository } from '@stanza/core';
 
 describe('DeletePhraseUseCase', () => {
   let useCase: DeletePhraseUseCase;

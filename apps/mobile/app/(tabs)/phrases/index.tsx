@@ -10,7 +10,7 @@ import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { usePhrases } from "@/hooks/phrase";
 import { PhraseListItem } from "@/infra/query/phrase";
 import { MaterialIcons } from "@expo/vector-icons";
-import { MAX_PHRASES_PER_USER } from "@lyrics-notes/core";
+import { MAX_PHRASES_PER_USER } from "@stanza/core";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";

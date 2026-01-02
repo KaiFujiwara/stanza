@@ -1,4 +1,4 @@
-import { Phrase, MAX_PHRASES_PER_USER, DomainError, ErrorCode, PhraseRepository } from '@lyrics-notes/core';
+import { Phrase, MAX_PHRASES_PER_USER, DomainError, ErrorCode, PhraseRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreatePhraseInput = {

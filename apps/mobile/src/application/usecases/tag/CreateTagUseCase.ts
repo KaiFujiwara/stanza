@@ -1,4 +1,4 @@
-import { Tag, MAX_TAGS_PER_USER, TagDomainService, TagName, DomainError, ErrorCode, TagRepository } from '@lyrics-notes/core';
+import { Tag, MAX_TAGS_PER_USER, TagDomainService, TagName, DomainError, ErrorCode, TagRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreateTagInput = {

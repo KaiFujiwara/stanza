@@ -3,7 +3,7 @@ import { HeaderActionButton } from "@/components/shared/HeaderActionButton";
 import { TextInput } from "@/components/shared/TextInput";
 import { usePhrases } from "@/hooks/phrase";
 import { MaterialIcons } from "@expo/vector-icons";
-import { MAX_PHRASE_NOTE_LENGTH, MAX_PHRASE_TEXT_LENGTH } from "@lyrics-notes/core";
+import { MAX_PHRASE_NOTE_LENGTH, MAX_PHRASE_TEXT_LENGTH } from "@stanza/core";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";

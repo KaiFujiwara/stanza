@@ -1,4 +1,4 @@
-import { EntityId, DomainError, ErrorCode, PhraseRepository } from '@lyrics-notes/core';
+import { EntityId, DomainError, ErrorCode, PhraseRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type DeletePhraseInput = {

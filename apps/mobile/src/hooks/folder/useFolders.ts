@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MAX_FOLDERS_PER_USER } from '@lyrics-notes/core';
+import { MAX_FOLDERS_PER_USER } from '@stanza/core';
 import { getFoldersWithCount, FolderWithCount } from '@/infra/query/folder';
 import { Alert } from 'react-native';
 import {

@@ -1,5 +1,5 @@
 import { ReorderFoldersUseCase } from '@/application/usecases/folder/ReorderFoldersUseCase';
-import { EntityId, FolderRepository } from '@lyrics-notes/core';
+import { EntityId, FolderRepository } from '@stanza/core';
 
 describe('ReorderFoldersUseCase', () => {
   let useCase: ReorderFoldersUseCase;

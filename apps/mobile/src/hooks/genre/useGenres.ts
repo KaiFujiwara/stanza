@@ -6,7 +6,7 @@ import {
   updateGenreUseCase,
   deleteGenreUseCase,
 } from '@/application/usecases';
-import { GenreDomainService, MAX_GENRES_PER_USER } from '@lyrics-notes/core';
+import { GenreDomainService, MAX_GENRES_PER_USER } from '@stanza/core';
 
 export const genreKeys = {
   all: ['genres'] as const,

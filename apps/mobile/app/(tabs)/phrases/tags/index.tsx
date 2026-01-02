@@ -6,7 +6,7 @@ import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { TagCard } from "@/components/tags/TagCard";
 import { useTags } from "@/hooks/tag";
 import { Tag } from "@/infra/query/tag";
-import { MAX_TAGS_PER_USER } from "@lyrics-notes/core";
+import { MAX_TAGS_PER_USER } from "@stanza/core";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { FlatList } from "react-native";

@@ -1,5 +1,5 @@
 import { UpdatePhraseUseCase } from '@/application/usecases/phrase/UpdatePhraseUseCase';
-import { EntityId, Phrase, PhraseRepository } from '@lyrics-notes/core';
+import { EntityId, Phrase, PhraseRepository } from '@stanza/core';
 
 describe('UpdatePhraseUseCase', () => {
   let useCase: UpdatePhraseUseCase;

@@ -1,5 +1,5 @@
 import { CreateTagUseCase } from '@/application/usecases/tag/CreateTagUseCase';
-import { MAX_TAGS_PER_USER, TagRepository } from '@lyrics-notes/core';
+import { MAX_TAGS_PER_USER, TagRepository } from '@stanza/core';
 
 describe('CreateTagUseCase', () => {
   let useCase: CreateTagUseCase;

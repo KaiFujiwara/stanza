@@ -1,5 +1,5 @@
 import { DeleteFolderUseCase } from '@/application/usecases/folder/DeleteFolderUseCase';
-import { EntityId, Folder, FolderRepository } from '@lyrics-notes/core';
+import { EntityId, Folder, FolderRepository } from '@stanza/core';
 
 describe('DeleteFolderUseCase', () => {
   let useCase: DeleteFolderUseCase;

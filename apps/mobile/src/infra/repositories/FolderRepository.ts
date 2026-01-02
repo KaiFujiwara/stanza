@@ -1,6 +1,6 @@
 import { getCurrentUserId } from '@/lib/supabase/auth';
 import { supabase } from '@/lib/supabase/client';
-import { EntityId, Folder, FolderRepository as IFolderRepository } from '@lyrics-notes/core';
+import { EntityId, Folder, FolderRepository as IFolderRepository } from '@stanza/core';
 
 type FolderRow = {
   id: string;

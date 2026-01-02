@@ -1,4 +1,4 @@
-import { DomainError } from '@lyrics-notes/core';
+import { DomainError } from '@stanza/core';
 import { ERROR_MESSAGES } from './messages';
 
 /**

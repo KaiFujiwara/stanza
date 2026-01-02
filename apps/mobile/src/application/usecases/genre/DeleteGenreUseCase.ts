@@ -1,4 +1,4 @@
-import { EntityId, GenreRepository } from '@lyrics-notes/core';
+import { EntityId, GenreRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type DeleteGenreInput = {

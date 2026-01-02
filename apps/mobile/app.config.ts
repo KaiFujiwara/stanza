@@ -3,8 +3,8 @@ import { ConfigContext, ExpoConfig } from 'expo/config';
 const IS_DEV = process.env.APP_ENV === 'development';
 
 const getUniqueIdentifier = () => {
-  if (IS_DEV) return 'com.somedon.lyricsnotes.dev';
-  return 'com.somedon.lyricsnotes';
+  if (IS_DEV) return 'com.somedon.stanza.dev';
+  return 'com.somedon.stanza';
 };
 
 const getAppName = () => {
@@ -21,15 +21,18 @@ const shouldUseEmulator = () => {
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: getAppName(),
-  slug: 'lyrics_notes',
+  slug: 'stanza',
   version: '1.0.0',
   orientation: 'portrait',
-  scheme: 'lyricsnotes',
+  scheme: 'stanza',
   userInterfaceStyle: 'automatic',
+  newArchEnabled: true,
   icon: './assets/images/icon.png',
   ios: {
+    supportsTablet: true,
     bundleIdentifier: getUniqueIdentifier(),
     infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
       NSAppTransportSecurity: {
         NSAllowsArbitraryLoads: true,
       },
@@ -38,15 +41,37 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   android: {
+    adaptiveIcon: {
+      backgroundColor: '#E6F4FE',
+    },
+    edgeToEdgeEnabled: true,
+    predictiveBackGestureEnabled: false,
     package: getUniqueIdentifier(),
+  },
+  web: {
+    output: 'static',
   },
   plugins: [
     'expo-router',
-    'expo-web-browser',
+    [
+      'expo-splash-screen',
+      {
+        resizeMode: 'contain',
+        backgroundColor: '#ffffff',
+        dark: {
+          backgroundColor: '#000000',
+        },
+      },
+    ],
   ],
+  experiments: {
+    typedRoutes: true,
+    reactCompiler: true,
+  },
   extra: {
+    router: {},
     eas: {
-      projectId: 'a3470b0c-5831-4f10-955d-4245bafa1123',
+      projectId: '42e7dcd9-df01-4b13-b787-8fa9756e0385',
     },
     env: process.env.APP_ENV || 'production',
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
@@ -55,5 +80,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     appName: 'Stanza',
     supportEmail: 'stanza.app.contact@gmail.com',
   },
-  owner: 'kaifujiwara',
+  owner: 'somedon',
 });

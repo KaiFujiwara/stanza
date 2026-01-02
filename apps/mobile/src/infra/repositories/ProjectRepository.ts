@@ -3,7 +3,7 @@ import {
   Project,
   ProjectRepository as ProjectRepositoryPort,
   EntityId,
-} from '@lyrics-notes/core';
+} from '@stanza/core';
 import { supabase } from '@/lib/supabase/client';
 
 type ProjectRow = {

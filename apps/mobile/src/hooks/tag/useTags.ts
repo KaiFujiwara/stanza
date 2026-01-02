@@ -1,5 +1,5 @@
 import { getTagDetail, getTags } from '@/infra/query/tag';
-import { MAX_TAGS_PER_USER } from '@lyrics-notes/core';
+import { MAX_TAGS_PER_USER } from '@stanza/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import {

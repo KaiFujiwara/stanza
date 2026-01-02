@@ -4,7 +4,7 @@ import {
   EntityId,
   Genre,
   GenreRepository as GenreRepositoryPort,
-} from '@lyrics-notes/core';
+} from '@stanza/core';
 
 type GenreRow = {
   id: string;

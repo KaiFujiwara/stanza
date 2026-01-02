@@ -1,5 +1,5 @@
 import { UpdateGenreUseCase } from '@/application/usecases/genre/UpdateGenreUseCase';
-import { EntityId, Genre, GenreRepository } from '@lyrics-notes/core';
+import { EntityId, Genre, GenreRepository } from '@stanza/core';
 
 describe('UpdateGenreUseCase', () => {
   let useCase: UpdateGenreUseCase;

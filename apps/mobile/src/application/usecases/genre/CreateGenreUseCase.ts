@@ -1,4 +1,4 @@
-import { Genre, MAX_GENRES_PER_USER, DomainError, ErrorCode, GenreRepository } from '@lyrics-notes/core';
+import { Genre, MAX_GENRES_PER_USER, DomainError, ErrorCode, GenreRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type CreateGenreInput = {

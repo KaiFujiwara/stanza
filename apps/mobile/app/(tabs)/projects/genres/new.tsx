@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useCreateGenre } from '@/hooks/genre';
 import { HeaderActionButton } from '@/components/shared/HeaderActionButton';
 import { SectionManager, SectionItem } from '@/components/shared/SectionManager';
-import { MAX_GENRE_NAME_LENGTH, MAX_GENRE_DESCRIPTION_LENGTH, MAX_SECTIONS_PER_GENRE } from '@lyrics-notes/core';
+import { MAX_GENRE_NAME_LENGTH, MAX_GENRE_DESCRIPTION_LENGTH, MAX_SECTIONS_PER_GENRE } from '@stanza/core';
 
 
 

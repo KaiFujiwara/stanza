@@ -4,7 +4,7 @@
 
 import { supabase } from '@/lib/supabase/client';
 import { getCurrentUserId } from '@/lib/supabase/auth';
-import { EntityId, Project, Section } from '@lyrics-notes/core';
+import { EntityId, Project, Section } from '@stanza/core';
 import type { ProjectRow, SectionRow } from './types';
 
 export async function getProjectDetail(projectId: string): Promise<Project | null> {

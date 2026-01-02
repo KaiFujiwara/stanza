@@ -4,7 +4,7 @@ import {
   EntityId,
   Phrase,
   PhraseRepository as PhraseRepositoryPort,
-} from '@lyrics-notes/core';
+} from '@stanza/core';
 
 type PhraseRow = {
   id: string;

@@ -3,7 +3,7 @@ import { TextInput } from '@/components/shared/TextInput';
 import { TAG_COLOR_PRESETS } from '@/constants/tagColors';
 import { useTagDetail } from '@/hooks/tag';
 import { MaterialIcons } from '@expo/vector-icons';
-import { MAX_TAG_NAME_LENGTH } from '@lyrics-notes/core';
+import { MAX_TAG_NAME_LENGTH } from '@stanza/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';

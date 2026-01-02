@@ -1,5 +1,5 @@
 import { CreateProjectUseCase } from '@/application/usecases/project/CreateProjectUseCase';
-import { EntityId, Genre, DomainError, ErrorCode, ProjectRepository, GenreRepository } from '@lyrics-notes/core';
+import { EntityId, Genre, DomainError, ErrorCode, ProjectRepository, GenreRepository } from '@stanza/core';
 
 describe('CreateProjectUseCase', () => {
   let useCase: CreateProjectUseCase;

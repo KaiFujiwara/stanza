@@ -1,0 +1,37 @@
+# EASビルドから除外するファイル・ディレクトリ
+# Note: このファイルはapps/mobileディレクトリにあるため、
+#       パスは ../../ でプロジェクトルートから指定します
+
+# Git関連
+../../.git/
+../../.github/
+
+# ドキュメント
+../../docs/
+../../*.md
+
+# 開発環境・設定ファイル
+../../.vscode/
+../../.idea/
+**/*.log
+**/.DS_Store
+
+# Supabase
+../../supabase/
+
+# テストファイル（ビルド時には不要）
+**/__tests__/
+**/__mocks__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# 開発用環境変数ファイル
+.env.local
+.env.development
+**/.env.local
+**/.env.development
+
+# キャッシュ
+**/node_modules/.cache/

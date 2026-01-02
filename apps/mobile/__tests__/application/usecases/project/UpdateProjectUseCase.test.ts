@@ -1,5 +1,5 @@
 import { UpdateProjectUseCase } from '@/application/usecases/project/UpdateProjectUseCase';
-import { EntityId, Project, Genre, Section, ProjectRepository, GenreRepository } from '@lyrics-notes/core';
+import { EntityId, Project, Genre, Section, ProjectRepository, GenreRepository } from '@stanza/core';
 
 describe('UpdateProjectUseCase', () => {
   let useCase: UpdateProjectUseCase;

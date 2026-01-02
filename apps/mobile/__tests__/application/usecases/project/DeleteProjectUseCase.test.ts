@@ -1,5 +1,5 @@
 import { DeleteProjectUseCase } from '@/application/usecases/project/DeleteProjectUseCase';
-import { EntityId, Project, ProjectRepository } from '@lyrics-notes/core';
+import { EntityId, Project, ProjectRepository } from '@stanza/core';
 
 describe('DeleteProjectUseCase', () => {
   let useCase: DeleteProjectUseCase;

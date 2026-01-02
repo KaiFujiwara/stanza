@@ -1,5 +1,5 @@
 import { CreateGenreUseCase } from '@/application/usecases/genre/CreateGenreUseCase';
-import { MAX_GENRES_PER_USER, GenreRepository } from '@lyrics-notes/core';
+import { MAX_GENRES_PER_USER, GenreRepository } from '@stanza/core';
 
 describe('CreateGenreUseCase', () => {
   let useCase: CreateGenreUseCase;

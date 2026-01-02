@@ -1,5 +1,5 @@
 import { DeleteGenreUseCase } from '@/application/usecases/genre/DeleteGenreUseCase';
-import { EntityId, GenreRepository } from '@lyrics-notes/core';
+import { EntityId, GenreRepository } from '@stanza/core';
 
 describe('DeleteGenreUseCase', () => {
   let useCase: DeleteGenreUseCase;

@@ -2,7 +2,7 @@ import { HeaderActionButton } from "@/components/shared/HeaderActionButton";
 import { TextInput } from "@/components/shared/TextInput";
 import { useDeleteFolder, useFolders, useUpdateFolderName } from "@/hooks/folder";
 import { MaterialIcons } from "@expo/vector-icons";
-import { MAX_FOLDER_NAME_LENGTH } from "@lyrics-notes/core";
+import { MAX_FOLDER_NAME_LENGTH } from "@stanza/core";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";

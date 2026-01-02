@@ -5,7 +5,7 @@ import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { useFolders, useReorderFolders } from "@/hooks/folder";
 import { FolderWithCount } from '@/infra/query/folder';
 import { MaterialIcons } from "@expo/vector-icons";
-import { MAX_FOLDERS_PER_USER } from "@lyrics-notes/core";
+import { MAX_FOLDERS_PER_USER } from "@stanza/core";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { RefreshControl, Text, TouchableOpacity, View } from "react-native";

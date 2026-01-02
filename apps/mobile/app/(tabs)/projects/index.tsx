@@ -8,7 +8,7 @@ import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { useProjects } from "@/hooks/project";
 import { ProjectListItem } from '@/infra/query/project';
 import { MaterialIcons } from "@expo/vector-icons";
-import { MAX_PROJECTS_PER_USER } from "@lyrics-notes/core";
+import { MAX_PROJECTS_PER_USER } from "@stanza/core";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";

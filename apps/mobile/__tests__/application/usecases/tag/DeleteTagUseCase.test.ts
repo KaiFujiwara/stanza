@@ -1,5 +1,5 @@
 import { DeleteTagUseCase } from '@/application/usecases/tag/DeleteTagUseCase';
-import { EntityId, Tag, TagRepository } from '@lyrics-notes/core';
+import { EntityId, Tag, TagRepository } from '@stanza/core';
 
 describe('DeleteTagUseCase', () => {
   let useCase: DeleteTagUseCase;

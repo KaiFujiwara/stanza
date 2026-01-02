@@ -1,5 +1,5 @@
 import { UpdateFolderUseCase } from '@/application/usecases/folder/UpdateFolderUseCase';
-import { EntityId, Folder, FolderRepository } from '@lyrics-notes/core';
+import { EntityId, Folder, FolderRepository } from '@stanza/core';
 
 describe('UpdateFolderUseCase', () => {
   let useCase: UpdateFolderUseCase;

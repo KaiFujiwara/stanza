@@ -1,4 +1,4 @@
-import { EntityId, DomainError, ErrorCode, TagRepository } from '@lyrics-notes/core';
+import { EntityId, DomainError, ErrorCode, TagRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type UpdateTagInput = {

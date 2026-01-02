@@ -1,4 +1,4 @@
-import { EntityId, DomainError, ErrorCode, FolderRepository } from '@lyrics-notes/core';
+import { EntityId, DomainError, ErrorCode, FolderRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type DeleteFolderInput = {

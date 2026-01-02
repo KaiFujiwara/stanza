@@ -5,7 +5,7 @@ import {
   Tag,
   TagNameValue,
   TagRepository as TagRepositoryPort,
-} from '@lyrics-notes/core';
+} from '@stanza/core';
 
 type TagRow = {
   id: string;

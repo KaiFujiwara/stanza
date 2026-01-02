@@ -1,5 +1,5 @@
 import { CreatePhraseUseCase } from '@/application/usecases/phrase/CreatePhraseUseCase';
-import { MAX_PHRASES_PER_USER, PhraseRepository } from '@lyrics-notes/core';
+import { MAX_PHRASES_PER_USER, PhraseRepository } from '@stanza/core';
 
 describe('CreatePhraseUseCase', () => {
   let useCase: CreatePhraseUseCase;

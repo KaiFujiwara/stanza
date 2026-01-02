@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "42e7dcd9-df01-4b13-b787-8fa9756e0385"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.somedon.stanza",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

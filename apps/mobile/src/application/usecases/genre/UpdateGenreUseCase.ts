@@ -1,4 +1,4 @@
-import { EntityId, DomainError, ErrorCode, GenreRepository } from '@lyrics-notes/core';
+import { EntityId, DomainError, ErrorCode, GenreRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type UpdateGenreInput = {

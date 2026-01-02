@@ -1,4 +1,4 @@
-import { EntityId, FolderRepository } from '@lyrics-notes/core';
+import { EntityId, FolderRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type ReorderFoldersInput = {

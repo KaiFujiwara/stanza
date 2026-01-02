@@ -16,7 +16,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useGenres } from '@/hooks/genre';
-import { MAX_PROJECT_TITLE_LENGTH } from '@lyrics-notes/core';
+import { MAX_PROJECT_TITLE_LENGTH } from '@stanza/core';
 
 export default function NewProjectScreen() {
   const router = useRouter();

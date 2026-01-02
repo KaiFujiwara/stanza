@@ -2,7 +2,7 @@ import {
   ProjectListItem,
   getProjectsOverview,
 } from '@/infra/query/project';
-import { ProjectDomainService, MAX_PROJECTS_PER_USER } from '@lyrics-notes/core';
+import { ProjectDomainService, MAX_PROJECTS_PER_USER } from '@stanza/core';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState, useEffect } from 'react';
 

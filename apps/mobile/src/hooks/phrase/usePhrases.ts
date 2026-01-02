@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MAX_PHRASES_PER_USER } from '@lyrics-notes/core';
+import { MAX_PHRASES_PER_USER } from '@stanza/core';
 import { getPhrases } from '@/infra/query/phrase';
 import { Alert } from 'react-native';
 import {

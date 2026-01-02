@@ -1,4 +1,4 @@
-import { EntityId, DomainError, ErrorCode, ProjectRepository } from '@lyrics-notes/core';
+import { EntityId, DomainError, ErrorCode, ProjectRepository } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
 export type DeleteProjectInput = {

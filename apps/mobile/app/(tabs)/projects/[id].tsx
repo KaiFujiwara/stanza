@@ -6,7 +6,7 @@ import { useDeleteProject } from '@/hooks/project/useDeleteProject';
 import { useGenres } from '@/hooks/genre';
 import { useFolders } from '@/hooks/folder/useFolders';
 import { MaterialIcons } from '@expo/vector-icons';
-import { MAX_PROJECT_TITLE_LENGTH, MAX_SECTIONS_PER_PROJECT, MAX_SECTION_CONTENT_LENGTH } from '@lyrics-notes/core';
+import { MAX_PROJECT_TITLE_LENGTH, MAX_SECTIONS_PER_PROJECT, MAX_SECTION_CONTENT_LENGTH } from '@stanza/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
