@@ -31,7 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/images/icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#E6F4FE',
   },
   ios: {
     supportsTablet: true,
@@ -48,6 +48,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
+      foregroundImage: './assets/images/icon.png',
       backgroundColor: '#E6F4FE',
     },
     edgeToEdgeEnabled: true,
@@ -62,10 +63,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
+        image: './assets/images/icon.png',
         resizeMode: 'contain',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#33BC55',
         dark: {
-          backgroundColor: '#000000',
+          image: './assets/images/icon.png',
+          resizeMode: 'contain',
+          backgroundColor: '#33BC55',
         },
       },
     ],
