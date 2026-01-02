@@ -28,9 +28,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
   icon: './assets/images/icon.png',
+  splash: {
+    image: './assets/images/icon.png',
+    resizeMode: 'contain',
+    backgroundColor: '#ffffff',
+  },
   ios: {
     supportsTablet: true,
     bundleIdentifier: getUniqueIdentifier(),
+    icon: './assets/images/icon.png',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
       NSAppTransportSecurity: {

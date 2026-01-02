@@ -14,7 +14,7 @@ config.resolver.nodeModulesPaths = [
 
 config.resolver.alias = {
   '@': path.resolve(projectRoot, './src'),
-  '@lyrics-notes/core': path.resolve(workspaceRoot, 'packages/core/src'),
+  '@stanza/core': path.resolve(workspaceRoot, 'packages/core/src'),
 };
 
 module.exports = withNativeWind(config, { input: './global.css' });

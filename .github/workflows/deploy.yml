@@ -52,4 +52,4 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build on EAS
-        run: eas build --platform ios --profile ${{ inputs.environment }} --non-interactive
+        run: cd apps/mobile && eas build --platform ios --profile ${{ inputs.environment }} --non-interactive
