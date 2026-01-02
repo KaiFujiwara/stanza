@@ -45,7 +45,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Preview on EAS
-        run: npx eas build --platform ios --profile preview --non-interactive --no-wait
+        run: npx eas build --platform ios --profile preview --non-interactive
 
   deploy-production:
     name: Deploy Production
@@ -87,4 +87,4 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Production on EAS
-        run: npx eas build --platform ios --profile production --non-interactive --no-wait
+        run: npx eas build --platform ios --profile production --non-interactive
