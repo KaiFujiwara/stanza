@@ -1,4 +1,5 @@
 import { ErrorCode } from '@stanza/core';
+import { InfraErrorCode } from './InfraError';
 
 /**
  * エラーメッセージの型定義
@@ -37,5 +38,27 @@ export const ERROR_MESSAGES: Record<ErrorCode, ErrorMessage> = {
   [ErrorCode.ENTITY_NOT_FOUND]: {
     user: 'データが見つかりません。画面を更新してから再度お試しください。',
     dev: 'Entity not found in repository',
+  },
+};
+
+/**
+ * InfraErrorCode → { user, dev? } のマッピング
+ */
+export const INFRA_ERROR_MESSAGES: Record<InfraErrorCode, ErrorMessage> = {
+  [InfraErrorCode.AUTH_FAILED]: {
+    user: 'ログインに失敗しました。しばらく時間をおいてからお試しください。',
+    dev: 'Authentication failed',
+  },
+  [InfraErrorCode.AUTH_CANCELLED]: {
+    user: 'ログインがキャンセルされました。',
+    dev: 'User cancelled authentication',
+  },
+  [InfraErrorCode.AUTH_SESSION_INVALID]: {
+    user: '認証情報の取得に失敗しました。再度ログインしてください。',
+    dev: 'Session is invalid or expired',
+  },
+  [InfraErrorCode.SIGN_OUT_FAILED]: {
+    user: 'ログアウトに失敗しました。しばらく時間をおいてからお試しください。',
+    dev: 'Sign out operation failed',
   },
 };

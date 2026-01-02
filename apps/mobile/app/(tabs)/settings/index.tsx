@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/providers/AuthProvider";
+import { toUserMessage } from "@/lib/errors";
 
 type SettingItem = {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -47,7 +48,8 @@ export default function SettingsScreen() {
               router.replace("/login");
             } catch (error) {
               console.error("[SettingsScreen] Logout error:", error);
-              Alert.alert("エラー", "ログアウトに失敗しました");
+              const errorInfo = toUserMessage(error);
+              Alert.alert("エラー", errorInfo.userMessage);
             }
           },
         },

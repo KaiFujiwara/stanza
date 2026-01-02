@@ -1,5 +1,6 @@
 import { DomainError } from '@stanza/core';
-import { ERROR_MESSAGES } from './messages';
+import { ERROR_MESSAGES, INFRA_ERROR_MESSAGES } from './messages';
+import { InfraError } from './InfraError';
 
 /**
  * エラーハンドリング結果
@@ -44,7 +45,29 @@ export function toUserMessage(error: unknown): ErrorHandlingResult {
     }
   }
 
-  // Error オブジェクトの場合（非ドメインエラー = インフラエラー）
+  // InfraError の場合（認証エラーなど）
+  if (InfraError.isInfraError(error)) {
+    const errorMessage = INFRA_ERROR_MESSAGES[error.code];
+
+    if (errorMessage) {
+      return {
+        userMessage: errorMessage.user,
+        devMessage: errorMessage.dev || error.message,
+        stack: error.stack,
+        details: error.cause ? { cause: error.cause } : undefined,
+      };
+    } else {
+      // マップに未定義のコード（念のためのフォールバック）
+      return {
+        userMessage: 'エラーが発生しました',
+        devMessage: `Unknown InfraErrorCode: ${error.code} - ${error.message}`,
+        stack: error.stack,
+        details: error.cause ? { cause: error.cause } : undefined,
+      };
+    }
+  }
+
+  // Error オブジェクトの場合（その他のインフラエラー）
   // リポジトリ層のエラーメッセージは開発者向けログとして扱い、
   // ユーザーには汎用メッセージを表示（セキュリティ・一貫性のため）
   if (error instanceof Error) {

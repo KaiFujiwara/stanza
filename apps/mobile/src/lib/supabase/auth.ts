@@ -1,6 +1,7 @@
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { supabase } from './client';
+import { InfraError, InfraErrorCode } from '@/lib/errors';
 
 // WebBrowserの設定（OAuth完了後に自動でブラウザを閉じる）
 WebBrowser.maybeCompleteAuthSession();
@@ -24,11 +25,18 @@ export async function signInWithGoogle(): Promise<void> {
   console.log('[signInWithGoogle] OAuth URL:', data?.url);
 
   if (error) {
-    throw new Error('Failed to sign in with Google', { cause: error });
+    throw new InfraError(
+      InfraErrorCode.AUTH_FAILED,
+      'OAuth initialization failed',
+      error
+    );
   }
 
   if (!data?.url) {
-    throw new Error('No OAuth URL returned');
+    throw new InfraError(
+      InfraErrorCode.AUTH_FAILED,
+      'No OAuth URL returned'
+    );
   }
 
   // WebBrowserでOAuthフローを開始
@@ -51,7 +59,10 @@ export async function signInWithGoogle(): Promise<void> {
     });
 
     if (!access_token || !refresh_token) {
-      throw new Error('No tokens found in callback URL');
+      throw new InfraError(
+        InfraErrorCode.AUTH_FAILED,
+        'No tokens found in callback URL'
+      );
     }
 
     // セッションを設定
@@ -61,12 +72,21 @@ export async function signInWithGoogle(): Promise<void> {
     });
 
     if (sessionError) {
-      throw new Error('Failed to set session', { cause: sessionError });
+      throw new InfraError(
+        InfraErrorCode.AUTH_FAILED,
+        'Failed to set session',
+        sessionError
+      );
     }
   } else if (result.type === 'cancel') {
-    throw new Error('Googleログインがキャンセルされました');
+    // ユーザーがキャンセルした場合は正常なフローとして扱う
+    console.log('[signInWithGoogle] User cancelled authentication');
+    return;
   } else {
-    throw new Error('Googleログインが失敗しました');
+    throw new InfraError(
+      InfraErrorCode.AUTH_FAILED,
+      'OAuth flow failed'
+    );
   }
 }
 
@@ -101,7 +121,11 @@ export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    throw new Error('Failed to sign out', { cause: error });
+    throw new InfraError(
+      InfraErrorCode.SIGN_OUT_FAILED,
+      'Sign out operation failed',
+      error
+    );
   }
 }
 
@@ -114,11 +138,18 @@ export async function getCurrentUserId(): Promise<string> {
   const { data: { session }, error } = await supabase.auth.getSession();
 
   if (error) {
-    throw new Error('User not authenticated', { cause: error });
+    throw new InfraError(
+      InfraErrorCode.AUTH_SESSION_INVALID,
+      'Failed to get session',
+      error
+    );
   }
 
   if (!session?.user) {
-    throw new Error('User not authenticated');
+    throw new InfraError(
+      InfraErrorCode.AUTH_SESSION_INVALID,
+      'No user session found'
+    );
   }
 
   return session.user.id;
