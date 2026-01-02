@@ -9,6 +9,7 @@ jobs:
   deploy-preview:
     name: Deploy Preview
     runs-on: ubuntu-latest
+    environment: preview
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +29,7 @@ jobs:
           version: latest
 
       - name: Link to Supabase Preview
-        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF_PREVIEW }}
+        run: supabase link --project-ref ${{ vars.SUPABASE_PROJECT_REF }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
@@ -49,6 +50,7 @@ jobs:
   deploy-production:
     name: Deploy Production
     runs-on: ubuntu-latest
+    environment: production
     needs: deploy-preview
     steps:
       - name: Checkout
@@ -69,7 +71,7 @@ jobs:
           version: latest
 
       - name: Link to Supabase Production
-        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF_PROD }}
+        run: supabase link --project-ref ${{ vars.SUPABASE_PROJECT_REF }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
