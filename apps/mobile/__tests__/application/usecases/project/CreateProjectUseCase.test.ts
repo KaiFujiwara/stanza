@@ -12,6 +12,7 @@ describe('CreateProjectUseCase', () => {
       findById: jest.fn(),
       delete: jest.fn(),
       reorder: jest.fn(),
+      countByFolder: jest.fn(),
     } as jest.Mocked<ProjectRepository>;
 
     mockGenreRepository = {

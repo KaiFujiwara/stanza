@@ -11,6 +11,7 @@ describe('DeleteProjectUseCase', () => {
       findById: jest.fn(),
       delete: jest.fn(),
       reorder: jest.fn(),
+      countByFolder: jest.fn(),
     } as jest.Mocked<ProjectRepository>;
 
     useCase = new DeleteProjectUseCase(mockProjectRepository);
