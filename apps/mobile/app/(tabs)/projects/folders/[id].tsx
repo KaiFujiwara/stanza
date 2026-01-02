@@ -47,6 +47,9 @@ export default function FolderDetailScreen() {
       id,
       name: editText.trim(),
     });
+
+    // 保存後、フォルダ一覧画面に戻る
+    router.back();
   };
 
   // フォルダ削除
@@ -61,9 +64,11 @@ export default function FolderDetailScreen() {
         {
           text: '削除',
           style: 'destructive',
-          onPress: async () => {
-            await deleteMutation.mutateAsync(id);
+          onPress: () => {
+            // 先に画面を閉じてから削除を実行（オプティミスティックアップデートによる画面エラーを防ぐ）
             router.back();
+            // 非同期で削除を実行（awaitしない）
+            deleteMutation.mutate(id);
           },
         },
       ]

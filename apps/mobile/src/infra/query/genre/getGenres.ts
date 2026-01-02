@@ -17,7 +17,7 @@ export async function getGenres(): Promise<GenreListItem[]> {
     .from('genres')
     .select('*')
     .eq('user_id', user.user.id)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: true });
 
   if (error) {
     throw new Error(`Failed to fetch genres: ${error.message}`);

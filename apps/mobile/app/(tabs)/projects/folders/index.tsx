@@ -7,7 +7,7 @@ import { FolderWithCount } from '@/infra/query/folder';
 import { MaterialIcons } from "@expo/vector-icons";
 import { MAX_FOLDERS_PER_USER } from "@stanza/core";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import DraggableFlatList, {
   RenderItemParams,
@@ -24,12 +24,20 @@ export default function FoldersEditScreen() {
   const { data: folders = [], isLoading, refetch, isRefetching, canCreate, currentCount, maxCount } = useFolders();
   const reorderMutation = useReorderFolders();
 
+  // フォルダが2未満になったら並び替えモードを自動的にオフ
+  useEffect(() => {
+    if (folders.length < 2 && isReorderMode) {
+      setIsReorderMode(false);
+    }
+  }, [folders.length, isReorderMode]);
+
   // フォルダ並び替え
   const handleReorder = async (data: FolderWithCount[]) => {
     const folderIds = data.map(f => f.id);
     await reorderMutation.mutateAsync(folderIds);
   };
 
+  // 統一したrenderItem（モードで表示を切り替え）
   const renderItem = ({ item, drag, isActive }: RenderItemParams<FolderWithCount>) => {
     return (
       <TouchableOpacity
@@ -37,10 +45,10 @@ export default function FoldersEditScreen() {
           isActive ? 'opacity-70' : ''
         }`}
         onLongPress={isReorderMode ? drag : undefined}
-        delayLongPress={150}
         onPress={() => !isReorderMode && router.push(`/projects/folders/${item.id}`)}
+        delayLongPress={150}
         activeOpacity={0.7}
-        disabled={false}
+        disabled={isActive}
       >
         {/* ドラッグハンドル - 並び替えモード時のみ表示 */}
         {isReorderMode && (
@@ -69,46 +77,51 @@ export default function FoldersEditScreen() {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-        <ScreenHeader
-          title="フォルダ管理"
-          showBackButton
-          onBackPress={() => router.back()}
-          showHelpButton
-          onHelpPress={() => setHelpModalVisible(true)}
-          rightButton={
-            <TouchableOpacity
-              onPress={() => setIsReorderMode(!isReorderMode)}
-              className={`ml-2 px-4 py-2 rounded-full flex-row items-center gap-1 ${
-                isReorderMode ? 'bg-green-500' : folders.length >= 2 ? 'bg-gray-200' : 'bg-gray-100'
-              }`}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              disabled={folders.length < 2}
-            >
-              <MaterialIcons
-                name={isReorderMode ? 'check' : 'swap-vert'}
-                size={16}
-                color={isReorderMode ? '#FFFFFF' : folders.length >= 2 ? '#374151' : '#D1D5DB'}
-              />
-              <Text className={`text-sm font-semibold ${
-                isReorderMode ? 'text-white' : folders.length >= 2 ? 'text-gray-700' : 'text-gray-300'
-              }`}>
-                {isReorderMode ? '完了' : '並び替え'}
-              </Text>
-            </TouchableOpacity>
-          }
-        />
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+      <ScreenHeader
+        title="フォルダ管理"
+        showBackButton
+        onBackPress={() => router.back()}
+        showHelpButton
+        onHelpPress={() => setHelpModalVisible(true)}
+        rightButton={
+          <TouchableOpacity
+            onPress={() => setIsReorderMode(!isReorderMode)}
+            className={`ml-2 px-4 py-2 rounded-full flex-row items-center gap-1 ${
+              isReorderMode ? 'bg-green-500' : folders.length >= 2 ? 'bg-gray-200' : 'bg-gray-100'
+            }`}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            disabled={folders.length < 2}
+          >
+            <MaterialIcons
+              name={isReorderMode ? 'check' : 'swap-vert'}
+              size={16}
+              color={isReorderMode ? '#FFFFFF' : folders.length >= 2 ? '#374151' : '#D1D5DB'}
+            />
+            <Text className={`text-sm font-semibold ${
+              isReorderMode ? 'text-white' : folders.length >= 2 ? 'text-gray-700' : 'text-gray-300'
+            }`}>
+              {isReorderMode ? '完了' : '並び替え'}
+            </Text>
+          </TouchableOpacity>
+        }
+      />
 
-        {/* フォルダ一覧 */}
+      {/* フォルダ一覧 */}
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <DraggableFlatList
           data={folders}
           renderItem={renderItem}
           keyExtractor={(item: FolderWithCount) => item.id}
           onDragEnd={({ data }: { data: FolderWithCount[] }) => handleReorder(data)}
+          activationDistance={isReorderMode ? 0 : 999999}
           containerStyle={{ flex: 1 }}
-          contentContainerStyle={{ flexGrow: 1 }}
-          ListHeaderComponent={null}
+          contentContainerStyle={folders.length === 0 ? { flex: 1 } : undefined}
+          removeClippedSubviews={false}
+          windowSize={21}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
@@ -131,19 +144,19 @@ export default function FoldersEditScreen() {
             ) : null
           }
         />
+      </GestureHandlerRootView>
 
-        {/* 右下のFAB - 並び替えモード時は非表示 */}
-        {!isReorderMode && <FloatingActionButton onPress={() => router.push('/projects/folders/new')} disabled={!canCreate} />}
+      {/* 右下のFAB - 並び替えモード時は非表示 */}
+      {!isReorderMode && <FloatingActionButton onPress={() => router.push('/projects/folders/new')} disabled={!canCreate} />}
 
-        <ItemCountBadge currentCount={currentCount} maxCount={maxCount} />
+      <ItemCountBadge currentCount={currentCount} maxCount={maxCount} />
 
-        <HelpModal
-          visible={helpModalVisible}
-          onClose={() => setHelpModalVisible(false)}
-          title="フォルダについて"
-          content={`フォルダは、プロジェクトを整理・分類するための機能です。アルバムやテーマごとにプロジェクトをまとめて管理できます。\n\nフォルダは最大${MAX_FOLDERS_PER_USER}個まで作成できます。並び替えボタンでフォルダの表示順序を変更できます。`}
-        />
-      </SafeAreaView>
-    </GestureHandlerRootView>
+      <HelpModal
+        visible={helpModalVisible}
+        onClose={() => setHelpModalVisible(false)}
+        title="フォルダについて"
+        content={`フォルダは、プロジェクトを整理・分類するための機能です。アルバムやテーマごとにプロジェクトをまとめて管理できます。\n\nフォルダは最大${MAX_FOLDERS_PER_USER}個まで作成できます。並び替えボタンでフォルダの表示順序を変更できます。`}
+      />
+    </SafeAreaView>
   );
 }

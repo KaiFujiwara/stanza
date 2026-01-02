@@ -192,9 +192,7 @@ export default function ProjectDetailScreen() {
       genreId: genreId === undefined ? null : genreId,
       sections: filteredSections,
     });
-    // 保存後、更新したフォルダIDを渡して一覧画面に戻る
-    // undefinedの場合はnullに変換（未分類タブを選択）
-    handleBack(folderId === undefined ? null : folderId);
+    // 保存後も画面に留まる（自動で戻らない）
   };
 
   const handleDelete = () => {

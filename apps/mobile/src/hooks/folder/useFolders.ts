@@ -22,6 +22,9 @@ export function useFolders() {
   const query = useQuery({
     queryKey: folderKeys.all,
     queryFn: getFoldersWithCount,
+    staleTime: 1000 * 60 * 5, // 5分間はキャッシュを新鮮とみなす
+    refetchOnWindowFocus: false, // ウィンドウフォーカス時の自動再取得を無効化
+    refetchOnMount: false, // マウント時の自動再取得を無効化（初回のみ取得）
   });
 
   const currentCount = query.data?.length ?? 0;
@@ -43,11 +46,23 @@ export function useCreateFolder() {
 
   return useMutation({
     mutationFn: async (params: { name: string }) => {
-      await createFolderUseCase.execute(params);
+      const result = await createFolderUseCase.execute(params);
+      return result.folder;
     },
-    onSuccess: () => {
-      // フォルダ一覧を無効化して再取得
-      queryClient.invalidateQueries({ queryKey: folderKeys.all });
+    onSuccess: (newFolder) => {
+      // 作成されたフォルダをキャッシュに追加
+      const previousFolders = queryClient.getQueryData<FolderWithCount[]>(folderKeys.all);
+
+      if (previousFolders) {
+        const newFolderWithCount: FolderWithCount = {
+          id: newFolder.id,
+          name: newFolder.name,
+          orderIndex: newFolder.orderIndex,
+          projectCount: 0,
+        };
+        queryClient.setQueryData(folderKeys.all, [...previousFolders, newFolderWithCount]);
+      }
+
       // プロジェクト概要も無効化（フォルダタブ表示のため）
       queryClient.invalidateQueries({ queryKey: ['projects', 'overview'] });
     },
@@ -66,15 +81,35 @@ export function useUpdateFolderName() {
   return useMutation({
     mutationFn: async (params: { id: string; name: string }) => {
       await updateFolderUseCase.execute(params);
+      return params;
     },
-    onSuccess: () => {
-      // フォルダ一覧を無効化して再取得
-      queryClient.invalidateQueries({ queryKey: folderKeys.all });
-      // プロジェクト概要も無効化（フォルダタブ表示のため）
-      queryClient.invalidateQueries({ queryKey: ['projects', 'overview'] });
+    onMutate: async (params) => {
+      // オプティミスティックアップデート: 即座にUIを更新
+      await queryClient.cancelQueries({ queryKey: folderKeys.all });
+
+      const previousFolders = queryClient.getQueryData<FolderWithCount[]>(folderKeys.all);
+
+      if (previousFolders) {
+        // フォルダ名を更新
+        const updatedFolders = previousFolders.map(f =>
+          f.id === params.id ? { ...f, name: params.name } : f
+        );
+        queryClient.setQueryData(folderKeys.all, updatedFolders);
+      }
+
+      return { previousFolders };
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _params, context) => {
+      // エラー時は元に戻す
+      if (context?.previousFolders) {
+        queryClient.setQueryData(folderKeys.all, context.previousFolders);
+      }
       Alert.alert('エラー', error.message);
+    },
+    onSettled: () => {
+      // 成功後にサーバーから再取得して同期
+      queryClient.invalidateQueries({ queryKey: folderKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['projects', 'overview'] });
     },
   });
 }
@@ -89,14 +124,31 @@ export function useDeleteFolder() {
     mutationFn: async (id: string) => {
       await deleteFolderUseCase.execute({ id });
     },
-    onSuccess: () => {
-      // フォルダ一覧を無効化して再取得
-      queryClient.invalidateQueries({ queryKey: folderKeys.all });
-      // プロジェクト概要も無効化（フォルダタブ表示のため）
-      queryClient.invalidateQueries({ queryKey: ['projects', 'overview'] });
+    onMutate: async (id) => {
+      // オプティミスティックアップデート: 即座にUIを更新
+      await queryClient.cancelQueries({ queryKey: folderKeys.all });
+
+      const previousFolders = queryClient.getQueryData<FolderWithCount[]>(folderKeys.all);
+
+      if (previousFolders) {
+        // 削除対象を除いたフォルダリストに更新
+        const updatedFolders = previousFolders.filter(f => f.id !== id);
+        queryClient.setQueryData(folderKeys.all, updatedFolders);
+      }
+
+      return { previousFolders };
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _id, context) => {
+      // エラー時は元に戻す
+      if (context?.previousFolders) {
+        queryClient.setQueryData(folderKeys.all, context.previousFolders);
+      }
       Alert.alert('エラー', error.message);
+    },
+    onSettled: () => {
+      // 成功後にサーバーから再取得して同期
+      queryClient.invalidateQueries({ queryKey: folderKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['projects', 'overview'] });
     },
   });
 }
