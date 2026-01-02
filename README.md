@@ -30,12 +30,6 @@
 
 3. **環境変数を設定**
 
-   **Supabase ローカル環境用**（Google OAuth を使用する場合）:
-   ```bash
-   cp supabase/.env.local.sample supabase/.env.local
-   # supabase/.env.local に Google OAuth の認証情報を記入
-   ```
-
    **モバイルアプリ用**:
    ```bash
    cp apps/mobile/.env.example apps/mobile/.env

@@ -7,12 +7,26 @@ import { InfraError, InfraErrorCode } from '@/lib/errors';
 WebBrowser.maybeCompleteAuthSession();
 
 /**
+ * 匿名認証を実行（開発用）
+ */
+export async function signInAnonymously(): Promise<void> {
+  const { error } = await supabase.auth.signInAnonymously();
+
+  if (error) {
+    throw new InfraError(
+      InfraErrorCode.AUTH_FAILED,
+      'Anonymous sign-in failed',
+      error
+    );
+  }
+}
+
+/**
  * Google OAuth認証を実行
  */
 export async function signInWithGoogle(): Promise<void> {
   // アプリのカスタムスキームでリダイレクトURLを作成
   const redirectUrl = Linking.createURL('/auth/callback');
-  console.log('[signInWithGoogle] redirectUrl:', redirectUrl);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -21,8 +35,6 @@ export async function signInWithGoogle(): Promise<void> {
       skipBrowserRedirect: true, // React Native/Expoでは必須
     },
   });
-
-  console.log('[signInWithGoogle] OAuth URL:', data?.url);
 
   if (error) {
     throw new InfraError(
@@ -45,18 +57,11 @@ export async function signInWithGoogle(): Promise<void> {
     redirectUrl
   );
 
-  console.log('[signInWithGoogle] result:', result);
-
   if (result.type === 'success' && result.url) {
     // URLからトークンを抽出
     const url = new URL(result.url);
     const access_token = url.searchParams.get('access_token');
     const refresh_token = url.searchParams.get('refresh_token');
-
-    console.log('[signInWithGoogle] tokens found:', {
-      hasAccessToken: !!access_token,
-      hasRefreshToken: !!refresh_token
-    });
 
     if (!access_token || !refresh_token) {
       throw new InfraError(
@@ -80,7 +85,6 @@ export async function signInWithGoogle(): Promise<void> {
     }
   } else if (result.type === 'cancel') {
     // ユーザーがキャンセルした場合は正常なフローとして扱う
-    console.log('[signInWithGoogle] User cancelled authentication');
     return;
   } else {
     throw new InfraError(

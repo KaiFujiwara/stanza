@@ -1,12 +1,25 @@
-import { Redirect } from 'expo-router';
+import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/providers/AuthProvider';
+import { View, ActivityIndicator } from 'react-native';
 
 export default function Index() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
 
-  if (isAuthenticated) {
-    return <Redirect href="/(tabs)/projects" />;
-  }
+  useEffect(() => {
+    if (isLoading) return;
 
-  return <Redirect href="/login" />;
+    if (isAuthenticated) {
+      router.replace('/(tabs)/projects');
+    } else {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, isLoading]);
+
+  return (
+    <View className="flex-1 justify-center items-center bg-white">
+      <ActivityIndicator size="large" color="#3B82F6" />
+    </View>
+  );
 }
