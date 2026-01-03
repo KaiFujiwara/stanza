@@ -1,10 +1,11 @@
 import { CreateProjectUseCase } from '@/application/usecases/project/CreateProjectUseCase';
-import { EntityId, Genre, DomainError, ErrorCode, ProjectRepository, GenreRepository } from '@stanza/core';
+import { EntityId, Genre, DomainError, ErrorCode, ProjectRepository, GenreRepository, FolderRepository } from '@stanza/core';
 
 describe('CreateProjectUseCase', () => {
   let useCase: CreateProjectUseCase;
   let mockProjectRepository: jest.Mocked<ProjectRepository>;
   let mockGenreRepository: jest.Mocked<GenreRepository>;
+  let mockFolderRepository: jest.Mocked<FolderRepository>;
 
   beforeEach(() => {
     mockProjectRepository = {
@@ -22,7 +23,15 @@ describe('CreateProjectUseCase', () => {
       countByUser: jest.fn(),
     } as jest.Mocked<GenreRepository>;
 
-    useCase = new CreateProjectUseCase(mockProjectRepository, mockGenreRepository);
+    mockFolderRepository = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      delete: jest.fn(),
+      reorder: jest.fn(),
+      countByUser: jest.fn(),
+    } as jest.Mocked<FolderRepository>;
+
+    useCase = new CreateProjectUseCase(mockProjectRepository, mockGenreRepository, mockFolderRepository);
 
     jest.clearAllMocks();
   });
@@ -49,6 +58,7 @@ describe('CreateProjectUseCase', () => {
 
     it('フォルダIDを指定して作成できる', async () => {
       const folderId = EntityId.generate();
+      mockFolderRepository.findById = jest.fn().mockResolvedValue({ id: folderId } as any);
       const input = {
         title: 'テストプロジェクト',
         folderId,
@@ -58,6 +68,7 @@ describe('CreateProjectUseCase', () => {
       const result = await useCase.execute(input);
 
       expect(result.project.folderId).toBe(folderId);
+      expect(mockFolderRepository.findById).toHaveBeenCalledWith(folderId);
     });
 
     it('ジャンルIDを指定して作成できる', async () => {

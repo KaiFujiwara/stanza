@@ -168,6 +168,7 @@ describe('UpdateProjectUseCase', () => {
       const folderId = EntityId.generate();
       const project = Project.create('元のタイトル');
       mockProjectRepository.findById = jest.fn().mockResolvedValue(project);
+      mockFolderRepository.findById = jest.fn().mockResolvedValue({ id: folderId } as any);
 
       const input = {
         id: projectId,
