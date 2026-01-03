@@ -6,6 +6,7 @@ import {
   ErrorCode,
   ProjectRepository,
   GenreRepository,
+  FolderRepository,
 } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
@@ -25,6 +26,7 @@ export class UpdateProjectUseCase {
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly genreRepository: GenreRepository,
+    private readonly folderRepository: FolderRepository,
   ) {}
 
   async execute(input: UpdateProjectInput): Promise<UpdateProjectOutput> {
@@ -52,6 +54,17 @@ export class UpdateProjectUseCase {
       // フォルダ移動
       if (input.folderId !== undefined) {
         const newFolderId = input.folderId ? EntityId.from(input.folderId) : undefined;
+
+        // フォルダが指定されている場合、フォルダの存在確認
+        if (newFolderId) {
+          const folder = await this.folderRepository.findById(newFolderId);
+          if (!folder) {
+            throw new DomainError(ErrorCode.ENTITY_NOT_FOUND, 'Folder not found', {
+              entity: 'folder',
+              id: newFolderId,
+            });
+          }
+        }
 
         // フォルダが変更された場合、移動先フォルダの orderIndex を再計算
         const currentFolderId = project.folderId;

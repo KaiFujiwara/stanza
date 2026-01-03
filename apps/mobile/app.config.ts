@@ -88,6 +88,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // アプリ設定
     appName: 'Stanza',
     supportEmail: 'stanza.app.contact@gmail.com',
+    appEnv: APP_ENV || 'production',
   },
   owner: 'somedon',
 });

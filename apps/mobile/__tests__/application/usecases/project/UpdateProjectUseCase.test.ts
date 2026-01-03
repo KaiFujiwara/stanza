@@ -1,10 +1,11 @@
 import { UpdateProjectUseCase } from '@/application/usecases/project/UpdateProjectUseCase';
-import { EntityId, Project, Genre, Section, ProjectRepository, GenreRepository } from '@stanza/core';
+import { EntityId, Project, Genre, Section, ProjectRepository, GenreRepository, FolderRepository } from '@stanza/core';
 
 describe('UpdateProjectUseCase', () => {
   let useCase: UpdateProjectUseCase;
   let mockProjectRepository: jest.Mocked<ProjectRepository>;
   let mockGenreRepository: jest.Mocked<GenreRepository>;
+  let mockFolderRepository: jest.Mocked<FolderRepository>;
 
   beforeEach(() => {
     mockProjectRepository = {
@@ -22,7 +23,15 @@ describe('UpdateProjectUseCase', () => {
       countByUser: jest.fn(),
     } as jest.Mocked<GenreRepository>;
 
-    useCase = new UpdateProjectUseCase(mockProjectRepository, mockGenreRepository);
+    mockFolderRepository = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      delete: jest.fn(),
+      reorder: jest.fn(),
+      countByUser: jest.fn(),
+    } as jest.Mocked<FolderRepository>;
+
+    useCase = new UpdateProjectUseCase(mockProjectRepository, mockGenreRepository, mockFolderRepository);
 
     jest.clearAllMocks();
   });
@@ -49,6 +58,7 @@ describe('UpdateProjectUseCase', () => {
       const folderId = EntityId.generate();
       const project = Project.create('テスト');
       mockProjectRepository.findById = jest.fn().mockResolvedValue(project);
+      mockFolderRepository.findById = jest.fn().mockResolvedValue({ id: folderId } as any);
 
       const input = {
         id: projectId,
@@ -59,6 +69,7 @@ describe('UpdateProjectUseCase', () => {
 
       expect(result.project.folderId).toBe(folderId);
       expect(mockProjectRepository.save).toHaveBeenCalledTimes(1);
+      expect(mockFolderRepository.findById).toHaveBeenCalledWith(folderId);
     });
 
     it('プロジェクトのフォルダを解除できる（null指定）', async () => {

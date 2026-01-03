@@ -53,8 +53,8 @@ export const updatePhraseUseCase = new UpdatePhraseUseCase(phraseRepository);
 export const deletePhraseUseCase = new DeletePhraseUseCase(phraseRepository);
 
 // Project UseCases
-export const createProjectUseCase = new CreateProjectUseCase(projectRepository, genreRepository);
-export const updateProjectUseCase = new UpdateProjectUseCase(projectRepository, genreRepository);
+export const createProjectUseCase = new CreateProjectUseCase(projectRepository, genreRepository, folderRepository);
+export const updateProjectUseCase = new UpdateProjectUseCase(projectRepository, genreRepository, folderRepository);
 export const deleteProjectUseCase = new DeleteProjectUseCase(projectRepository);
 
 // Tag UseCases

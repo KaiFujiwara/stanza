@@ -1,5 +1,6 @@
 // Repository implementation
 import { supabase } from '@/lib/supabase/client';
+import { getCurrentUserId } from '@/lib/supabase/auth';
 import {
   EntityId,
   Genre,
@@ -29,16 +30,13 @@ export class GenreRepository implements GenreRepositoryPort {
   }
 
   async findById(id: EntityId): Promise<Genre | null> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
       .eq('id', id as string)
-      .eq('user_id', user.user.id)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
@@ -53,14 +51,11 @@ export class GenreRepository implements GenreRepositoryPort {
   }
 
   async save(genre: Genre): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const payload = {
       id: genre.id as string,
-      user_id: user.user.id,
+      user_id: userId,
       name: genre.name as string,
       description: genre.description ?? null,
       section_names: [...genre.sectionNames],
@@ -77,16 +72,13 @@ export class GenreRepository implements GenreRepositoryPort {
   }
 
   async delete(id: EntityId): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { error } = await supabase
       .from(this.tableName)
       .delete()
       .eq('id', id as string)
-      .eq('user_id', user.user.id);
+      .eq('user_id', userId);
 
     if (error) {
       throw new Error('Failed to delete genre', { cause: error });
@@ -94,15 +86,12 @@ export class GenreRepository implements GenreRepositoryPort {
   }
 
   async countByUser(): Promise<number> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { count, error } = await supabase
       .from(this.tableName)
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.user.id);
+      .eq('user_id', userId);
 
     if (error) {
       throw new Error('Failed to count genres', { cause: error });

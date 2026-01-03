@@ -6,6 +6,7 @@ import {
   ErrorCode,
   ProjectRepository,
   GenreRepository,
+  FolderRepository,
 } from '@stanza/core';
 import { toUserMessage } from '@/lib/errors';
 
@@ -23,7 +24,8 @@ export type CreateProjectOutput = {
 export class CreateProjectUseCase {
   constructor(
     private readonly projectRepository: ProjectRepository,
-    private readonly genreRepository: GenreRepository
+    private readonly genreRepository: GenreRepository,
+    private readonly folderRepository: FolderRepository
   ) {}
 
   async execute(input: CreateProjectInput): Promise<CreateProjectOutput> {
@@ -36,6 +38,17 @@ export class CreateProjectUseCase {
 
       const folderId = input.folderId ? EntityId.from(input.folderId) : undefined;
       const genreId = input.genreId ? EntityId.from(input.genreId) : undefined;
+
+      // フォルダが指定されている場合、フォルダの存在確認
+      if (folderId) {
+        const folder = await this.folderRepository.findById(folderId);
+        if (!folder) {
+          throw new DomainError(ErrorCode.ENTITY_NOT_FOUND, 'Folder not found', {
+            entity: 'folder',
+            id: folderId,
+          });
+        }
+      }
 
       // ジャンルが指定されている場合、ジャンルの存在確認
       if (genreId) {

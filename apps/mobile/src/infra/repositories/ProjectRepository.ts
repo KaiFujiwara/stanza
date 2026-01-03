@@ -1,10 +1,11 @@
 // Repository implementation
+import { getCurrentUserId } from '@/lib/supabase/auth';
+import { supabase } from '@/lib/supabase/client';
 import {
+  EntityId,
   Project,
   ProjectRepository as ProjectRepositoryPort,
-  EntityId,
 } from '@stanza/core';
-import { supabase } from '@/lib/supabase/client';
 
 type ProjectRow = {
   id: string;
@@ -36,16 +37,13 @@ export class ProjectRepository implements ProjectRepositoryPort {
   }
 
   async findById(id: EntityId): Promise<Project | null> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
       .eq('id', id as string)
-      .eq('user_id', user.user.id)
+      .eq('user_id', userId)
       .eq('is_deleted', false)
       .single();
 
@@ -61,10 +59,7 @@ export class ProjectRepository implements ProjectRepositoryPort {
   }
 
   async save(project: Project): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     // セクションのペイロードを作成
     const sections = project.sections.map((section) => ({
@@ -78,7 +73,7 @@ export class ProjectRepository implements ProjectRepositoryPort {
     if (project.orderIndex === 0) {
       const { error } = await supabase.rpc('create_project_with_sections', {
         p_project_id: project.id as string,
-        p_user_id: user.user.id,
+        p_user_id: userId,
         p_title: project.title as string,
         p_folder_id: project.folderId ? (project.folderId as string) : null,
         p_genre_id: project.genreId ? (project.genreId as string) : null,
@@ -94,7 +89,7 @@ export class ProjectRepository implements ProjectRepositoryPort {
     // orderIndex が 0 以外の場合は既存プロジェクトの更新（トランザクション内でセクションも保存）
     const { error } = await supabase.rpc('save_project_with_sections', {
       p_project_id: project.id as string,
-      p_user_id: user.user.id,
+      p_user_id: userId,
       p_title: project.title as string,
       p_folder_id: project.folderId ? (project.folderId as string) : null,
       p_genre_id: project.genreId ? (project.genreId as string) : null,
@@ -109,47 +104,8 @@ export class ProjectRepository implements ProjectRepositoryPort {
     }
   }
 
-  async reorder(projectIds: EntityId[], folderId?: EntityId): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
-
-    // 各プロジェクトのorder_indexを個別に更新
-    const updates = projectIds.map((projectId, index) => {
-      let query = supabase
-        .from(this.tableName)
-        .update({
-          order_index: index,
-          // updated_at はDBトリガーで自動更新
-        })
-        .eq('id', projectId as string)
-        .eq('user_id', user.user.id);
-
-      // folder_idでフィルタリング
-      if (folderId) {
-        query = query.eq('folder_id', folderId as string);
-      } else {
-        query = query.is('folder_id', null);
-      }
-
-      return query;
-    });
-
-    const results = await Promise.all(updates);
-
-    // いずれかの更新でエラーが発生した場合
-    const errors = results.filter((result) => result.error);
-    if (errors.length > 0) {
-      throw new Error('Failed to reorder projects', { cause: errors });
-    }
-  }
-
   async delete(id: EntityId): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { error } = await supabase
       .from(this.tableName)
@@ -159,7 +115,7 @@ export class ProjectRepository implements ProjectRepositoryPort {
         // updated_at はDBトリガーで自動更新
       })
       .eq('id', id as string)
-      .eq('user_id', user.user.id);
+      .eq('user_id', userId);
 
     if (error) {
       throw new Error('Failed to delete project', { cause: error });
@@ -167,15 +123,12 @@ export class ProjectRepository implements ProjectRepositoryPort {
   }
 
   async countByFolder(folderId?: EntityId): Promise<number> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     let query = supabase
       .from(this.tableName)
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.user.id)
+      .eq('user_id', userId)
       .eq('is_deleted', false);
 
     // フォルダIDでフィルタリング

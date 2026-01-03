@@ -26,13 +26,16 @@ export async function signInAnonymously(): Promise<void> {
  */
 export async function signInWithGoogle(): Promise<void> {
   // アプリのカスタムスキームでリダイレクトURLを作成
-  const redirectUrl = Linking.createURL('/auth/callback');
+  const redirectUrl = Linking.createURL('auth/callback', { scheme: 'stanza' });
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: redirectUrl,
       skipBrowserRedirect: true, // React Native/Expoでは必須
+      queryParams: {
+        prompt: 'select_account', // 常にアカウント選択画面を表示
+      },
     },
   });
 
@@ -58,38 +61,75 @@ export async function signInWithGoogle(): Promise<void> {
   );
 
   if (result.type === 'success' && result.url) {
-    // URLからトークンを抽出
-    const url = new URL(result.url);
-    const access_token = url.searchParams.get('access_token');
-    const refresh_token = url.searchParams.get('refresh_token');
-
-    if (!access_token || !refresh_token) {
+    // result.url が deep link (stanza://) じゃない場合は処理しない
+    if (!result.url.startsWith('stanza://')) {
       throw new InfraError(
         InfraErrorCode.AUTH_FAILED,
-        'No tokens found in callback URL'
+        `Expected deep link but got: ${result.url}`
       );
     }
 
-    // セッションを設定
-    const { error: sessionError } = await supabase.auth.setSession({
-      access_token,
-      refresh_token,
-    });
+    // コールバックURLをパース
+    const parsed = Linking.parse(result.url);
 
-    if (sessionError) {
-      throw new InfraError(
-        InfraErrorCode.AUTH_FAILED,
-        'Failed to set session',
-        sessionError
-      );
+    // PKCE Flow: query (?code=...) をチェック
+    const code = typeof parsed.queryParams?.code === 'string' ? parsed.queryParams.code : null;
+
+    // Implicit Flow: fragment (#access_token=...&refresh_token=...) をチェック
+    // Linking.parse は fragment を queryParams に入れないので、手動でパース
+    const fragment = result.url.split('#')[1];
+    let access_token: string | null = null;
+    let refresh_token: string | null = null;
+
+    if (fragment) {
+      const fragmentParams = new URLSearchParams(fragment);
+      access_token = fragmentParams.get('access_token');
+      refresh_token = fragmentParams.get('refresh_token');
     }
+
+    // PKCE フロー: code を session に交換
+    if (code) {
+      const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+
+      if (sessionError) {
+        throw new InfraError(
+          InfraErrorCode.AUTH_FAILED,
+          `Failed to exchange code for session: ${sessionError.message}`,
+          sessionError
+        );
+      }
+      return;
+    }
+
+    // Implicit フロー: access_token と refresh_token を直接使用
+    if (access_token && refresh_token) {
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+
+      if (sessionError) {
+        throw new InfraError(
+          InfraErrorCode.AUTH_FAILED,
+          `Failed to set session: ${sessionError.message}`,
+          sessionError
+        );
+      }
+      return;
+    }
+
+    // code も token も見つからない場合
+    throw new InfraError(
+      InfraErrorCode.AUTH_FAILED,
+      `No code or tokens found in callback URL. URL: ${result.url}`
+    );
   } else if (result.type === 'cancel') {
     // ユーザーがキャンセルした場合は正常なフローとして扱う
     return;
   } else {
     throw new InfraError(
       InfraErrorCode.AUTH_FAILED,
-      'OAuth flow failed'
+      `OAuth flow failed with type: ${result.type}`
     );
   }
 }

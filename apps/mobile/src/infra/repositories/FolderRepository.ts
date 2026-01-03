@@ -43,6 +43,7 @@ export class FolderRepository implements IFolderRepository {
     // 新規作成の場合は PostgreSQL 関数を使用（orderIndex の自動採番）
     if (folder.orderIndex === 0) {
       const { error } = await supabase.rpc('create_folder', {
+        p_folder_id: folder.id as string,
         p_user_id: userId,
         p_name: folder.name,
       });

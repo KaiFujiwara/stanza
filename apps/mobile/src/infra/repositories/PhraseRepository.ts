@@ -1,5 +1,6 @@
 // Repository implementation
 import { supabase } from '@/lib/supabase/client';
+import { getCurrentUserId } from '@/lib/supabase/auth';
 import {
   EntityId,
   Phrase,
@@ -55,16 +56,13 @@ export class PhraseRepository implements PhraseRepositoryPort {
   }
 
   async findById(id: EntityId): Promise<Phrase | null> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
       .eq('id', id as string)
-      .eq('user_id', user.user.id)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
@@ -80,10 +78,7 @@ export class PhraseRepository implements PhraseRepositoryPort {
   }
 
   async save(phrase: Phrase): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     // トランザクション内で実行
     const { error } = await supabase.rpc('save_phrase_with_tags', {
@@ -91,7 +86,7 @@ export class PhraseRepository implements PhraseRepositoryPort {
       p_phrase_id: phrase.id,
       p_tag_ids: phrase.tagIds,
       p_text: phrase.text,
-      p_user_id: user.user.id,
+      p_user_id: userId,
     });
 
     if (error) {
@@ -101,17 +96,14 @@ export class PhraseRepository implements PhraseRepositoryPort {
 
 
   async delete(id: EntityId): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     // phrase_tagsのON DELETE CASCADEにより、phrasesレコード削除時に自動削除される
     const { error } = await supabase
       .from(this.tableName)
       .delete()
       .eq('id', id as string)
-      .eq('user_id', user.user.id);
+      .eq('user_id', userId);
 
     if (error) {
       throw new Error('Failed to delete phrase', { cause: error });
@@ -119,15 +111,12 @@ export class PhraseRepository implements PhraseRepositoryPort {
   }
 
   async countByUser(): Promise<number> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { count, error } = await supabase
       .from(this.tableName)
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.user.id);
+      .eq('user_id', userId);
 
     if (error) {
       throw new Error('Failed to count phrases', { cause: error });

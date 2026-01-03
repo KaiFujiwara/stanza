@@ -1,5 +1,6 @@
 // Repository implementation
 import { supabase } from '@/lib/supabase/client';
+import { getCurrentUserId } from '@/lib/supabase/auth';
 import {
   EntityId,
   Tag,
@@ -28,16 +29,13 @@ export class TagRepository implements TagRepositoryPort {
   }
 
   async findById(id: EntityId): Promise<Tag | null> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
       .eq('id', id as string)
-      .eq('user_id', user.user.id)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
@@ -52,14 +50,11 @@ export class TagRepository implements TagRepositoryPort {
   }
 
   async save(tag: Tag): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const payload = {
       id: tag.id as string,
-      user_id: user.user.id,
+      user_id: userId,
       name: tag.name,
       color: tag.color ?? null,
       // created_at, updated_at はDBトリガーで自動管理
@@ -79,17 +74,14 @@ export class TagRepository implements TagRepositoryPort {
   }
 
   async delete(id: EntityId): Promise<void> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     // phrase_tagsのON DELETE CASCADEにより、tagsレコード削除時に自動削除される
     const { error } = await supabase
       .from(this.tableName)
       .delete()
       .eq('id', id as string)
-      .eq('user_id', user.user.id);
+      .eq('user_id', userId);
 
     if (error) {
       throw new Error('Failed to delete tag', { cause: error });
@@ -97,15 +89,12 @@ export class TagRepository implements TagRepositoryPort {
   }
 
   async countByUser(): Promise<number> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     const { count, error } = await supabase
       .from(this.tableName)
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.user.id);
+      .eq('user_id', userId);
 
     if (error) {
       throw new Error('Failed to count tags', { cause: error });
@@ -115,16 +104,13 @@ export class TagRepository implements TagRepositoryPort {
   }
 
   async existsByName(name: TagNameValue): Promise<boolean> {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
-      throw new Error('User not authenticated');
-    }
+    const userId = await getCurrentUserId();
 
     // 完全一致で検索（大文字小文字を区別する）
     const { data, error } = await supabase
       .from(this.tableName)
       .select('id')
-      .eq('user_id', user.user.id)
+      .eq('user_id', userId)
       .eq('name', name)
       .limit(1);
 
