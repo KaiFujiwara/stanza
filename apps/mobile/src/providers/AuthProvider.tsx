@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { checkSession, signOut as authSignOut } from '@/lib/supabase/auth';
 import { supabase } from '@/lib/supabase/client';
+import { queryClient } from '@/providers/QueryProvider';
 import type { Session } from '@supabase/supabase-js';
 
 interface AuthContextValue {
@@ -56,6 +57,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await authSignOut();
     setIsAuthenticated(false);
     setSession(null);
+
+    // React Query のキャッシュをクリア（前のユーザーのデータを削除）
+    queryClient.clear();
   };
 
   if (isLoading) {
