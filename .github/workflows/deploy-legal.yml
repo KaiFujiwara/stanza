@@ -1,4 +1,4 @@
-name: Deploy Legal Documents
+name: Deploy Web Home
 
 on:
   # 手動実行のみ
@@ -31,8 +31,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 法的文書のみをアップロード
-          path: 'apps/web-legal/public'
+          # ホームページと法的文書をアップロード
+          path: 'apps/web-home/public'
 
       - name: Deploy to GitHub Pages
         id: deployment

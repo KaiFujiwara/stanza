@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stanza - 歌詞制作特化メモアプリ</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f0fdf4;
+            min-height: 100vh;
+        }
+
+        header {
+            background: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            max-width: 280px;
+            height: auto;
+            margin: 0 auto 16px;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .main-section {
+            background-color: #f0fdf4;
+            padding: 60px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .intro h2 {
+            color: #111827;
+            font-size: 2rem;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .intro p {
+            color: #6b7280;
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .section-title {
+            color: #111827;
+            font-size: 1.75rem;
+            margin-bottom: 32px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .feature {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .feature:hover {
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+            transform: translateY(-2px);
+            border-color: #22C55E;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .feature h3 {
+            color: #111827;
+            margin-bottom: 12px;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .feature p {
+            color: #6b7280;
+            line-height: 1.7;
+            font-size: 0.9375rem;
+        }
+
+        .links-section {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .links-section h3 {
+            color: #111827;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .links a {
+            color: #22C55E;
+            text-decoration: none;
+            padding: 14px 24px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-weight: 500;
+            border: 1px solid #bbf7d0;
+        }
+
+        .links a:hover {
+            background: #22C55E;
+            color: white;
+            border-color: #22C55E;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+        }
+
+        footer {
+            background-color: #f0fdf4;
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .intro h2 {
+                font-size: 1.5rem;
+            }
+
+            .intro p {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .main-section {
+                padding: 40px 20px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .links {
+                grid-template-columns: 1fr;
+            }
+
+            .links-section {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="title.png" alt="Stanza" class="logo">
+            <p class="subtitle">歌詞制作特化メモアプリ</p>
+        </div>
+    </header>
+
+    <div class="main-section">
+        <div class="container">
+            <div class="intro">
+                <h2>歌詞制作をもっと自由に</h2>
+                <p>
+                    思いついたフレーズをストックしたり、楽曲ごとに歌詞を管理。<br>
+                    Stanzaは、あなたの歌詞制作をサポートします。
+                </p>
+            </div>
+
+            <h3 class="section-title">主な機能</h3>
+            <div class="features">
+                <div class="feature">
+                    <span class="feature-icon">🎵</span>
+                    <h3>歌詞プロジェクト</h3>
+                    <p>楽曲ごとに歌詞を管理します。プロジェクトを作成し、セクション（イントロ、Aメロなど）を追加して歌詞を書いていきましょう。</p>
+                </div>
+
+                <div class="feature">
+                    <span class="feature-icon">💬</span>
+                    <h3>フレーズストック</h3>
+                    <p>思いついたフレーズを保存しておく機能です。タグで整理して、必要な時にすぐ見つけられます。気に入ったフレーズをストックしておき、後で歌詞制作に活用できます。</p>
+                </div>
+
+                <div class="feature">
+                    <span class="feature-icon">📁</span>
+                    <h3>フォルダ管理</h3>
+                    <p>プロジェクトをフォルダで整理できます。アルバムやジャンル、制作時期などで分類すると便利です。</p>
+                </div>
+
+                <div class="feature">
+                    <span class="feature-icon">🎼</span>
+                    <h3>ジャンル管理</h3>
+                    <p>楽曲のジャンル別にセクション構成のテンプレートを管理できます。よく使う構成を登録しておくと、プロジェクト作成時に自動で設定されます。</p>
+                </div>
+
+                <div class="feature">
+                    <span class="feature-icon">🏷️</span>
+                    <h3>タグ管理</h3>
+                    <p>フレーズにタグを付けて整理できます。テーマや雰囲気、使いたいシーンなどで分類すると、必要な時にすぐに見つけられます。</p>
+                </div>
+            </div>
+
+            <div class="links-section">
+                <h3>利用規約・プライバシーポリシー</h3>
+                <div class="links">
+                    <a href="terms.html">利用規約</a>
+                    <a href="privacy.html">プライバシーポリシー</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Stanza. All rights reserved.</p>
+    </footer>
+</body>
+</html>

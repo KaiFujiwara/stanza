@@ -1,15 +1,16 @@
-# Web Legal Documents
+# Web Home
 
-このディレクトリには、App Store審査用の利用規約とプライバシーポリシーが含まれています。
+このディレクトリには、アプリケーションのホームページと法的文書が含まれています。
 
 ## ファイル
 
+- `public/index.html` - アプリケーションホームページ（Google OAuth申請用）
 - `public/terms.html` - 利用規約
 - `public/privacy.html` - プライバシーポリシー
 
 ## 公開方法
 
-これらのファイルは、App Store審査時に公開URLが必要です。GitHub Actionsで手動デプロイします。
+これらのファイルは、Google OAuth申請やApp Store審査時に公開URLが必要です。GitHub Actionsで手動デプロイします。
 
 ### GitHub Pagesの設定手順
 
@@ -19,9 +20,17 @@
 ### デプロイ手順（手動）
 
 1. GitHubリポジトリの **Actions** タブに移動
-2. 左サイドバーから **"Deploy Legal Documents to GitHub Pages"** を選択
+2. 左サイドバーから **"Deploy Web Home"** を選択
 3. **"Run workflow"** ボタンをクリック
 4. mainブランチを選択して **"Run workflow"** を実行
+
+### 公開URL
+
+デプロイ後、以下のURLでアクセスできます：
+
+- ホームページ: `https://kaifujiwara.github.io/stanza/`
+- 利用規約: `https://kaifujiwara.github.io/stanza/terms.html`
+- プライバシーポリシー: `https://kaifujiwara.github.io/stanza/privacy.html`
 
 ### アプリ内での表示
 
