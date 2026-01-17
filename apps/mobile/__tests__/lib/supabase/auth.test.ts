@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Expo関連のモジュールをモック
 jest.mock('expo-linking', () => ({
@@ -8,6 +9,12 @@ jest.mock('expo-linking', () => ({
 jest.mock('expo-web-browser', () => ({
   maybeCompleteAuthSession: jest.fn(),
   openAuthSessionAsync: jest.fn(),
+}));
+
+// AsyncStorageをモック
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getAllKeys: jest.fn(),
+  multiRemove: jest.fn(),
 }));
 
 // supabaseモジュールをモック
@@ -21,11 +28,12 @@ jest.mock('@/lib/supabase/client', () => ({
       signInWithOAuth: jest.fn(),
       setSession: jest.fn(),
     },
+    rpc: jest.fn(),
   },
 }));
 
-// checkSessionをインポート（モックの後に）
-import { checkSession } from '@/lib/supabase/auth';
+// checkSession, deleteAccountをインポート（モックの後に）
+import { checkSession, deleteAccount } from '@/lib/supabase/auth';
 
 describe('auth', () => {
   describe('checkSession', () => {
@@ -156,6 +164,63 @@ describe('auth', () => {
       expect(mockGetSession).toHaveBeenCalledTimes(1);
       expect(mockGetUser).toHaveBeenCalledTimes(1);
       expect(mockSignOut).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteAccount', () => {
+    const mockRpc = supabase.rpc as jest.MockedFunction<typeof supabase.rpc>;
+    const mockGetAllKeys = AsyncStorage.getAllKeys as jest.MockedFunction<
+      typeof AsyncStorage.getAllKeys
+    >;
+    const mockMultiRemove = AsyncStorage.multiRemove as jest.MockedFunction<
+      typeof AsyncStorage.multiRemove
+    >;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('アカウント削除が成功し、AsyncStorageをクリアする', async () => {
+      mockRpc.mockResolvedValue({ data: null, error: null });
+      mockGetAllKeys.mockResolvedValue([
+        'supabase.auth.token',
+        'supabase.auth.session',
+        'other.key',
+      ]);
+      mockMultiRemove.mockResolvedValue();
+
+      await deleteAccount();
+
+      expect(mockRpc).toHaveBeenCalledWith('delete_user_account');
+      expect(mockGetAllKeys).toHaveBeenCalledTimes(1);
+      expect(mockMultiRemove).toHaveBeenCalledWith([
+        'supabase.auth.token',
+        'supabase.auth.session',
+      ]);
+    });
+
+    it('Supabaseキーが存在しない場合、multiRemoveを呼ばない', async () => {
+      mockRpc.mockResolvedValue({ data: null, error: null });
+      mockGetAllKeys.mockResolvedValue(['other.key', 'another.key']);
+
+      await deleteAccount();
+
+      expect(mockRpc).toHaveBeenCalledWith('delete_user_account');
+      expect(mockGetAllKeys).toHaveBeenCalledTimes(1);
+      expect(mockMultiRemove).not.toHaveBeenCalled();
+    });
+
+    it('RPC呼び出しでエラーが発生した場合、InfraErrorをスローする', async () => {
+      const mockError = {
+        message: 'Unauthorized',
+        code: 'P0001',
+      };
+      mockRpc.mockResolvedValue({ data: null, error: mockError as any });
+
+      await expect(deleteAccount()).rejects.toThrow('Failed to delete account');
+      expect(mockRpc).toHaveBeenCalledWith('delete_user_account');
+      expect(mockGetAllKeys).not.toHaveBeenCalled();
+      expect(mockMultiRemove).not.toHaveBeenCalled();
     });
   });
 });

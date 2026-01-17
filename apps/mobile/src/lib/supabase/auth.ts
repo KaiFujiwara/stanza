@@ -1,5 +1,8 @@
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './client';
 import { InfraError, InfraErrorCode } from '@/lib/errors';
 
@@ -18,6 +21,171 @@ export async function signInAnonymously(): Promise<void> {
       'Anonymous sign-in failed',
       error
     );
+  }
+}
+
+/**
+ * Apple ID認証を実行
+ * iOS: ネイティブのApple認証を使用
+ * Android: OAuth フローを使用（Web経由）
+ */
+export async function signInWithApple(): Promise<void> {
+  if (Platform.OS === 'ios') {
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      // Supabase認証
+      if (!credential.identityToken) {
+        throw new InfraError(
+          InfraErrorCode.AUTH_FAILED,
+          'No identityToken received from Apple'
+        );
+      }
+
+      const {
+        error,
+        data: { user },
+      } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken,
+      });
+
+      if (error) {
+        throw new InfraError(
+          InfraErrorCode.AUTH_FAILED,
+          'Apple sign-in failed',
+          error
+        );
+      }
+
+      // Appleは初回サインイン時のみ氏名を提供するため、保存する
+      if (user && credential.fullName) {
+        const nameParts = [];
+        if (credential.fullName.givenName) nameParts.push(credential.fullName.givenName);
+        if (credential.fullName.middleName) nameParts.push(credential.fullName.middleName);
+        if (credential.fullName.familyName) nameParts.push(credential.fullName.familyName);
+
+        const fullName = nameParts.join(' ');
+
+        await supabase.auth.updateUser({
+          data: {
+            full_name: fullName,
+            given_name: credential.fullName.givenName,
+            family_name: credential.fullName.familyName,
+          },
+        });
+      }
+    } catch (error: any) {
+      if (error.code === 'ERR_REQUEST_CANCELED') {
+        // ユーザーがキャンセルした場合は正常なフローとして扱う
+        return;
+      }
+      throw new InfraError(
+        InfraErrorCode.AUTH_FAILED,
+        'Apple sign-in failed',
+        error
+      );
+    }
+  } else {
+    // Android: OAuth フロー
+    const redirectUrl = Linking.createURL('auth/callback', { scheme: 'stanza' });
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: redirectUrl,
+        skipBrowserRedirect: true,
+      },
+    });
+
+    if (error) {
+      throw new InfraError(
+        InfraErrorCode.AUTH_FAILED,
+        'OAuth initialization failed',
+        error
+      );
+    }
+
+    if (!data?.url) {
+      throw new InfraError(
+        InfraErrorCode.AUTH_FAILED,
+        'No OAuth URL returned'
+      );
+    }
+
+    // WebBrowserでOAuthフローを開始
+    const result = await WebBrowser.openAuthSessionAsync(
+      data.url,
+      redirectUrl
+    );
+
+    if (result.type === 'success' && result.url) {
+      if (!result.url.startsWith('stanza://')) {
+        throw new InfraError(
+          InfraErrorCode.AUTH_FAILED,
+          `Expected deep link but got: ${result.url}`
+        );
+      }
+
+      const parsed = Linking.parse(result.url);
+      const code = typeof parsed.queryParams?.code === 'string' ? parsed.queryParams.code : null;
+
+      const fragment = result.url.split('#')[1];
+      let access_token: string | null = null;
+      let refresh_token: string | null = null;
+
+      if (fragment) {
+        const fragmentParams = new URLSearchParams(fragment);
+        access_token = fragmentParams.get('access_token');
+        refresh_token = fragmentParams.get('refresh_token');
+      }
+
+      if (code) {
+        const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (sessionError) {
+          throw new InfraError(
+            InfraErrorCode.AUTH_FAILED,
+            `Failed to exchange code for session: ${sessionError.message}`,
+            sessionError
+          );
+        }
+        return;
+      }
+
+      if (access_token && refresh_token) {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+
+        if (sessionError) {
+          throw new InfraError(
+            InfraErrorCode.AUTH_FAILED,
+            `Failed to set session: ${sessionError.message}`,
+            sessionError
+          );
+        }
+        return;
+      }
+
+      throw new InfraError(
+        InfraErrorCode.AUTH_FAILED,
+        `No code or tokens found in callback URL. URL: ${result.url}`
+      );
+    } else if (result.type === 'cancel') {
+      return;
+    } else {
+      throw new InfraError(
+        InfraErrorCode.AUTH_FAILED,
+        `OAuth flow failed with type: ${result.type}`
+      );
+    }
   }
 }
 
@@ -197,4 +365,30 @@ export async function getCurrentUserId(): Promise<string> {
   }
 
   return session.user.id;
+}
+
+/**
+ * アカウントを削除
+ * ユーザーデータとアカウントを完全に削除
+ */
+export async function deleteAccount(): Promise<void> {
+  // データベース関数を呼び出してアカウントを削除
+  // パラメータなし（auth.uid()を使用）
+  const { error } = await supabase.rpc('delete_user_account');
+
+  if (error) {
+    throw new InfraError(
+      InfraErrorCode.AUTH_FAILED,
+      'Failed to delete account',
+      error
+    );
+  }
+
+  // 削除成功後、AsyncStorageから直接セッションデータを完全に削除
+  // auth.usersが既に削除されているため、通常のsignOut()は失敗する
+  const keys = await AsyncStorage.getAllKeys();
+  const supabaseKeys = keys.filter(key => key.startsWith('supabase.auth.'));
+  if (supabaseKeys.length > 0) {
+    await AsyncStorage.multiRemove(supabaseKeys);
+  }
 }

@@ -36,6 +36,9 @@ import { CreateTagUseCase } from './tag/CreateTagUseCase';
 import { UpdateTagUseCase } from './tag/UpdateTagUseCase';
 import { DeleteTagUseCase } from './tag/DeleteTagUseCase';
 
+// Auth UseCases
+import { DeleteAccountUseCase } from './auth/DeleteAccountUseCase';
+
 // Folder UseCases
 export const createFolderUseCase = new CreateFolderUseCase(folderRepository);
 export const updateFolderUseCase = new UpdateFolderUseCase(folderRepository);
@@ -61,3 +64,6 @@ export const deleteProjectUseCase = new DeleteProjectUseCase(projectRepository);
 export const createTagUseCase = new CreateTagUseCase(tagRepository);
 export const updateTagUseCase = new UpdateTagUseCase(tagRepository);
 export const deleteTagUseCase = new DeleteTagUseCase(tagRepository);
+
+// Auth UseCases
+export const deleteAccountUseCase = new DeleteAccountUseCase();

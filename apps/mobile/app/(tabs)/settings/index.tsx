@@ -1,11 +1,11 @@
 import { ScreenHeader } from "@/components/shared/ScreenHeader";
+import { toUserMessage } from "@/lib/errors";
+import { useAuth } from "@/providers/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View, Alert } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "@/providers/AuthProvider";
-import { toUserMessage } from "@/lib/errors";
 
 type SettingItem = {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -136,6 +136,13 @@ export default function SettingsScreen() {
     {
       title: "アカウント",
       items: [
+        {
+          icon: "account-circle",
+          title: "アカウント連携",
+          subtitle: "アカウント削除",
+          onPress: handleGoogleAccountLink,
+          showChevron: true,
+        },
         {
           icon: "logout",
           title: "ログアウト",

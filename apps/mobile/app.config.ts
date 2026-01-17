@@ -62,6 +62,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
+    'expo-apple-authentication',
     [
       'expo-splash-screen',
       {

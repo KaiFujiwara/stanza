@@ -51,3 +51,11 @@ app-example
 # IDE and Editor
 .claude
 .vscode
+
+# secret keys
+.secret_keys/apple_auth
+secret_keys/*.p8
+secret_keys/*.p12
+secret_keys/*.key
+secret_keys/*.pem
+secret_keys/AuthKey_*

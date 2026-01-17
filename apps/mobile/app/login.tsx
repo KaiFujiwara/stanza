@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, Image, Alert, ActivityIndicator, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { signInWithGoogle, signInAnonymously } from '@/lib/supabase/auth';
+import { signInWithGoogle, signInWithApple, signInAnonymously } from '@/lib/supabase/auth';
 import { toUserMessage } from '@/lib/errors';
 import { AntDesign } from '@expo/vector-icons';
 import Constants from 'expo-constants';
@@ -10,6 +10,20 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const isDevelopment = __DEV__; // React Nativeの組み込み定数
   const router = useRouter();
+
+  const handleAppleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithApple();
+      // 認証成功後、indexにリダイレクト（AuthProviderが認証状態を判定してprojectsに遷移）
+      router.replace('/');
+    } catch (error) {
+      const errorInfo = toUserMessage(error);
+      Alert.alert('ログインエラー', errorInfo.userMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -53,8 +67,31 @@ export default function LoginScreen() {
         歌詞制作に特化したメモアプリ
         {isDevelopment
           ? '\n開発モード：匿名ログインで始めます'
-          : '\nGoogleアカウントでログインして始めましょう'}
+          : '\nアカウントでログインして始めましょう'}
       </Text>
+
+      {/* Apple Sign-in ボタン（本番環境のみ） */}
+      {!isDevelopment && (
+        <Pressable
+          onPress={handleAppleSignIn}
+          disabled={isLoading}
+          className={`w-full flex-row items-center justify-center bg-black rounded-full px-6 py-4 mb-4 ${
+            isLoading ? 'opacity-50' : 'active:bg-gray-900'
+          }`}
+          style={{ maxWidth: 320 }}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <>
+              <AntDesign name="apple" size={22} color="#FFFFFF" />
+              <Text className="ml-3 text-white font-semibold text-lg">
+                Appleでログイン
+              </Text>
+            </>
+          )}
+        </Pressable>
+      )}
 
       {/* Google Sign-in ボタン（本番環境のみ） */}
       {!isDevelopment && (
