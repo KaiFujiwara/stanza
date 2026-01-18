@@ -38,6 +38,8 @@ import { DeleteTagUseCase } from './tag/DeleteTagUseCase';
 
 // Auth UseCases
 import { DeleteAccountUseCase } from './auth/DeleteAccountUseCase';
+import { LinkAppleAccountUseCase } from './auth/LinkAppleAccountUseCase';
+import { LinkGoogleAccountUseCase } from './auth/LinkGoogleAccountUseCase';
 
 // Folder UseCases
 export const createFolderUseCase = new CreateFolderUseCase(folderRepository);
@@ -67,3 +69,5 @@ export const deleteTagUseCase = new DeleteTagUseCase(tagRepository);
 
 // Auth UseCases
 export const deleteAccountUseCase = new DeleteAccountUseCase();
+export const linkAppleAccountUseCase = new LinkAppleAccountUseCase();
+export const linkGoogleAccountUseCase = new LinkGoogleAccountUseCase();

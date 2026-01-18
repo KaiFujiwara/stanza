@@ -1,4 +1,4 @@
-import { deleteAccountUseCase } from "@/application/usecases";
+import { deleteAccountUseCase, linkAppleAccountUseCase, linkGoogleAccountUseCase } from "@/application/usecases";
 import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -6,12 +6,15 @@ import { useState, useEffect } from "react";
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@/lib/supabase/client";
+import { toUserMessage } from "@/lib/errors";
 
 export default function AccountScreen() {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [connectedProviders, setConnectedProviders] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLinkingApple, setIsLinkingApple] = useState(false);
+  const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
 
   useEffect(() => {
     loadUserIdentities();
@@ -33,6 +36,48 @@ export default function AccountScreen() {
       setConnectedProviders([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLinkApple = async () => {
+    if (connectedProviders.includes('apple')) {
+      Alert.alert("既に連携済み", "Appleアカウントは既に連携されています。");
+      return;
+    }
+
+    try {
+      setIsLinkingApple(true);
+      await linkAppleAccountUseCase.execute();
+      // リンク成功 - プロバイダー情報を再読み込み
+      await loadUserIdentities();
+      Alert.alert("連携成功", "Appleアカウントを連携しました。");
+    } catch (error) {
+      console.error('[AccountScreen] Apple linking error:', error);
+      const errorInfo = toUserMessage(error);
+      Alert.alert("連携エラー", errorInfo.userMessage);
+    } finally {
+      setIsLinkingApple(false);
+    }
+  };
+
+  const handleLinkGoogle = async () => {
+    if (connectedProviders.includes('google')) {
+      Alert.alert("既に連携済み", "Googleアカウントは既に連携されています。");
+      return;
+    }
+
+    try {
+      setIsLinkingGoogle(true);
+      await linkGoogleAccountUseCase.execute();
+      // リンク成功 - プロバイダー情報を再読み込み
+      await loadUserIdentities();
+      Alert.alert("連携成功", "Googleアカウントを連携しました。");
+    } catch (error) {
+      console.error('[AccountScreen] Google linking error:', error);
+      const errorInfo = toUserMessage(error);
+      Alert.alert("連携エラー", errorInfo.userMessage);
+    } finally {
+      setIsLinkingGoogle(false);
     }
   };
 
@@ -106,15 +151,24 @@ export default function AccountScreen() {
             ) : (
               <View>
                 {/* Apple */}
-                <View className="bg-white rounded-lg border border-gray-200 p-4 flex-row items-center mb-3">
+                <TouchableOpacity
+                  onPress={handleLinkApple}
+                  disabled={connectedProviders.includes('apple') || isLinkingApple}
+                  className="bg-white rounded-lg border border-gray-200 p-4 flex-row items-center mb-3"
+                  activeOpacity={connectedProviders.includes('apple') ? 1 : 0.6}
+                >
                   <View className={`w-12 h-12 rounded-full items-center justify-center mr-3 ${
                     connectedProviders.includes('apple') ? 'bg-black' : 'bg-gray-100'
                   }`}>
-                    <AntDesign
-                      name="apple"
-                      size={24}
-                      color={connectedProviders.includes('apple') ? '#FFFFFF' : '#9CA3AF'}
-                    />
+                    {isLinkingApple ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <AntDesign
+                        name="apple"
+                        size={24}
+                        color={connectedProviders.includes('apple') ? '#FFFFFF' : '#9CA3AF'}
+                      />
+                    )}
                   </View>
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-gray-900">Apple</Text>
@@ -124,21 +178,32 @@ export default function AccountScreen() {
                       {connectedProviders.includes('apple') ? '連携済み' : '未連携'}
                     </Text>
                   </View>
-                  {connectedProviders.includes('apple') && (
+                  {connectedProviders.includes('apple') ? (
                     <MaterialIcons name="check-circle" size={24} color="#10B981" />
+                  ) : (
+                    <MaterialIcons name="add-circle-outline" size={24} color="#9CA3AF" />
                   )}
-                </View>
+                </TouchableOpacity>
 
                 {/* Google */}
-                <View className="bg-white rounded-lg border border-gray-200 p-4 flex-row items-center">
+                <TouchableOpacity
+                  onPress={handleLinkGoogle}
+                  disabled={connectedProviders.includes('google') || isLinkingGoogle}
+                  className="bg-white rounded-lg border border-gray-200 p-4 flex-row items-center"
+                  activeOpacity={connectedProviders.includes('google') ? 1 : 0.6}
+                >
                   <View className={`w-12 h-12 rounded-full items-center justify-center mr-3 ${
                     connectedProviders.includes('google') ? 'bg-white border-2 border-gray-200' : 'bg-gray-100'
                   }`}>
-                    <AntDesign
-                      name="google"
-                      size={24}
-                      color={connectedProviders.includes('google') ? '#4285F4' : '#9CA3AF'}
-                    />
+                    {isLinkingGoogle ? (
+                      <ActivityIndicator size="small" color="#4285F4" />
+                    ) : (
+                      <AntDesign
+                        name="google"
+                        size={24}
+                        color={connectedProviders.includes('google') ? '#4285F4' : '#9CA3AF'}
+                      />
+                    )}
                   </View>
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-gray-900">Google</Text>
@@ -148,10 +213,12 @@ export default function AccountScreen() {
                       {connectedProviders.includes('google') ? '連携済み' : '未連携'}
                     </Text>
                   </View>
-                  {connectedProviders.includes('google') && (
+                  {connectedProviders.includes('google') ? (
                     <MaterialIcons name="check-circle" size={24} color="#10B981" />
+                  ) : (
+                    <MaterialIcons name="add-circle-outline" size={24} color="#9CA3AF" />
                   )}
-                </View>
+                </TouchableOpacity>
               </View>
             )}
           </View>
