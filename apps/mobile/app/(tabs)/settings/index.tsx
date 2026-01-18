@@ -138,15 +138,14 @@ export default function SettingsScreen() {
       items: [
         {
           icon: "account-circle",
-          title: "アカウント連携",
-          subtitle: "アカウント削除",
+          title: "アカウント",
+          subtitle: "連携状況・アカウント削除",
           onPress: handleGoogleAccountLink,
           showChevron: true,
         },
         {
           icon: "logout",
           title: "ログアウト",
-          subtitle: "アプリからログアウトします",
           onPress: handleLogout,
           showChevron: false,
         },

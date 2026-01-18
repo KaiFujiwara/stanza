@@ -7,13 +7,15 @@ import { AntDesign } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
 export default function LoginScreen() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isAnonymousLoading, setIsAnonymousLoading] = useState(false);
   const isDevelopment = __DEV__; // React Nativeの組み込み定数
   const router = useRouter();
 
   const handleAppleSignIn = async () => {
     try {
-      setIsLoading(true);
+      setIsAppleLoading(true);
       await signInWithApple();
       // 認証成功後、indexにリダイレクト（AuthProviderが認証状態を判定してprojectsに遷移）
       router.replace('/');
@@ -21,13 +23,13 @@ export default function LoginScreen() {
       const errorInfo = toUserMessage(error);
       Alert.alert('ログインエラー', errorInfo.userMessage);
     } finally {
-      setIsLoading(false);
+      setIsAppleLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-      setIsLoading(true);
+      setIsGoogleLoading(true);
       await signInWithGoogle();
       // 認証成功後、indexにリダイレクト（AuthProviderが認証状態を判定してprojectsに遷移）
       router.replace('/');
@@ -35,13 +37,13 @@ export default function LoginScreen() {
       const errorInfo = toUserMessage(error);
       Alert.alert('ログインエラー', errorInfo.userMessage);
     } finally {
-      setIsLoading(false);
+      setIsGoogleLoading(false);
     }
   };
 
   const handleAnonymousSignIn = async () => {
     try {
-      setIsLoading(true);
+      setIsAnonymousLoading(true);
       await signInAnonymously();
       // 認証成功後、indexにリダイレクト（AuthProviderが認証状態を判定してprojectsに遷移）
       router.replace('/');
@@ -49,7 +51,7 @@ export default function LoginScreen() {
       const errorInfo = toUserMessage(error);
       Alert.alert('ログインエラー', errorInfo.userMessage);
     } finally {
-      setIsLoading(false);
+      setIsAnonymousLoading(false);
     }
   };
 
@@ -74,13 +76,13 @@ export default function LoginScreen() {
       {!isDevelopment && (
         <Pressable
           onPress={handleAppleSignIn}
-          disabled={isLoading}
+          disabled={isAppleLoading || isGoogleLoading}
           className={`w-full flex-row items-center justify-center bg-black rounded-full px-6 py-4 mb-4 ${
-            isLoading ? 'opacity-50' : 'active:bg-gray-900'
+            (isAppleLoading || isGoogleLoading) ? 'opacity-50' : 'active:bg-gray-900'
           }`}
           style={{ maxWidth: 320 }}
         >
-          {isLoading ? (
+          {isAppleLoading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
             <>
@@ -97,13 +99,13 @@ export default function LoginScreen() {
       {!isDevelopment && (
         <Pressable
           onPress={handleGoogleSignIn}
-          disabled={isLoading}
+          disabled={isAppleLoading || isGoogleLoading}
           className={`w-full flex-row items-center justify-center bg-white border-2 border-gray-300 rounded-full px-6 py-4 ${
-            isLoading ? 'opacity-50' : 'active:bg-gray-50'
+            (isAppleLoading || isGoogleLoading) ? 'opacity-50' : 'active:bg-gray-50'
           }`}
           style={{ maxWidth: 320 }}
         >
-          {isLoading ? (
+          {isGoogleLoading ? (
             <ActivityIndicator size="small" color="#4285F4" />
           ) : (
             <>
@@ -121,9 +123,9 @@ export default function LoginScreen() {
       {isDevelopment && (
         <Pressable
           onPress={handleAnonymousSignIn}
-          disabled={isLoading}
+          disabled={isAnonymousLoading}
           className={`w-full mt-4 flex-row items-center justify-center bg-gray-100 border-2 border-gray-300 rounded-full px-6 py-4 ${
-            isLoading ? 'opacity-50' : 'active:bg-gray-200'
+            isAnonymousLoading ? 'opacity-50' : 'active:bg-gray-200'
           }`}
           style={{ maxWidth: 320 }}
         >

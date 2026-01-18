@@ -1,14 +1,40 @@
 import { deleteAccountUseCase } from "@/application/usecases";
 import { ScreenHeader } from "@/components/shared/ScreenHeader";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { supabase } from "@/lib/supabase/client";
 
 export default function AccountScreen() {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [connectedProviders, setConnectedProviders] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadUserIdentities();
+  }, []);
+
+  const loadUserIdentities = async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        setConnectedProviders([]);
+        return;
+      }
+
+      // ユーザーの認証プロバイダーを取得
+      const providers = user.identities?.map(identity => identity.provider) || [];
+      setConnectedProviders(providers);
+    } catch (error) {
+      console.error('Failed to load user identities:', error);
+      setConnectedProviders([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -62,13 +88,74 @@ export default function AccountScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <ScreenHeader
-        title="アカウント連携"
+        title="アカウント"
         showBackButton
         onBackPress={() => router.back()}
       />
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-4 py-6">
+          {/* 連携中のアカウント */}
+          <View className="mb-8">
+            <Text className="text-base font-bold text-gray-900 mb-3">連携アカウント</Text>
+
+            {isLoading ? (
+              <View className="bg-white rounded-lg border border-gray-200 p-4 items-center">
+                <ActivityIndicator size="small" color="#6B7280" />
+              </View>
+            ) : (
+              <View>
+                {/* Apple */}
+                <View className="bg-white rounded-lg border border-gray-200 p-4 flex-row items-center mb-3">
+                  <View className={`w-12 h-12 rounded-full items-center justify-center mr-3 ${
+                    connectedProviders.includes('apple') ? 'bg-black' : 'bg-gray-100'
+                  }`}>
+                    <AntDesign
+                      name="apple"
+                      size={24}
+                      color={connectedProviders.includes('apple') ? '#FFFFFF' : '#9CA3AF'}
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-base font-semibold text-gray-900">Apple</Text>
+                    <Text className={`text-sm ${
+                      connectedProviders.includes('apple') ? 'text-green-600' : 'text-gray-500'
+                    }`}>
+                      {connectedProviders.includes('apple') ? '連携済み' : '未連携'}
+                    </Text>
+                  </View>
+                  {connectedProviders.includes('apple') && (
+                    <MaterialIcons name="check-circle" size={24} color="#10B981" />
+                  )}
+                </View>
+
+                {/* Google */}
+                <View className="bg-white rounded-lg border border-gray-200 p-4 flex-row items-center">
+                  <View className={`w-12 h-12 rounded-full items-center justify-center mr-3 ${
+                    connectedProviders.includes('google') ? 'bg-white border-2 border-gray-200' : 'bg-gray-100'
+                  }`}>
+                    <AntDesign
+                      name="google"
+                      size={24}
+                      color={connectedProviders.includes('google') ? '#4285F4' : '#9CA3AF'}
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-base font-semibold text-gray-900">Google</Text>
+                    <Text className={`text-sm ${
+                      connectedProviders.includes('google') ? 'text-green-600' : 'text-gray-500'
+                    }`}>
+                      {connectedProviders.includes('google') ? '連携済み' : '未連携'}
+                    </Text>
+                  </View>
+                  {connectedProviders.includes('google') && (
+                    <MaterialIcons name="check-circle" size={24} color="#10B981" />
+                  )}
+                </View>
+              </View>
+            )}
+          </View>
+
           {/* アカウント削除 */}
           <View>
             <Text className="text-base font-bold text-gray-900 mb-3">アカウント管理</Text>
